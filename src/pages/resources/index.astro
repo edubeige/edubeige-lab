@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../../components/BaseLayout.astro";
 import GalleryCard from "../../components/GalleryCard.astro";
-import PageIntro from "../../components/PageIntro.astro";
 import ResourceCard from "../../components/ResourceCard.astro";
 import { getGalleryItems, getResources } from "../../lib/site";
 
@@ -10,36 +9,53 @@ const gallery = await getGalleryItems();
 const types = [...new Set(resources.map((resource) => resource.data.type))];
 ---
 
-<BaseLayout title="자료실 | edubeige-lab" navSection="resources">
-  <PageIntro
-    eyebrow="Resources"
-    title="자료실"
-    description="수업과 연수 운영에 바로 활용할 수 있는 강의 자료와 실습 파일을 다운로드 리스트 중심으로 정리했습니다."
-    accent="리스트형 다운로드 허브"
-  />
+<BaseLayout
+  title="자료실 | edubeige-lab"
+  navSection="resources"
+  shell="library"
+  searchAction={`${import.meta.env.BASE_URL}resources`}
+  searchPlaceholder="자료를 검색해보세요..."
+>
+  <section class="library-hero library-hero--compact container">
+    <div class="library-hero__copy">
+      <p class="eyebrow">Premium Resource Library</p>
+      <h1>연수 자료를 한곳에서 정리해 보는 자료실</h1>
+      <p class="library-hero__summary">
+        오늘 연수에 필요한 파일과 공통 참고 자료를 검색하고 바로 다운로드할 수 있도록 정리했습니다.
+      </p>
+    </div>
 
-  <section class="container section">
-    <div class="content-panel content-panel--catalog">
-      <div class="search-stage">
-        <input id="resource-search" class="search-input" type="search" placeholder="자료 제목 또는 설명 검색" />
+    <div class="library-hero__search">
+      <label class="visually-hidden" for="resource-search">자료 검색</label>
+      <input id="resource-search" class="search-input search-input--hero" type="search" placeholder="자료 제목이나 설명을 검색해보세요..." />
+    </div>
+
+    <div class="library-filter-row">
+      <div class="filter-cluster">
+        <span class="filter-label">파일 유형</span>
+        <div class="chip-group" data-filter-group="type">
+          <button class="filter-chip is-active" type="button" data-value="">전체</button>
+          {types.map((type) => <button class="filter-chip" type="button" data-value={type}>{type.toUpperCase()}</button>)}
+        </div>
       </div>
 
-      <div class="filter-stack">
-        <div class="filter-cluster">
-          <span class="filter-label">파일 유형</span>
-          <div class="chip-group" data-filter-group="type">
-            <button class="filter-chip is-active" type="button" data-value="">전체</button>
-            {types.map((type) => <button class="filter-chip" type="button" data-value={type}>{type.toUpperCase()}</button>)}
-          </div>
+      <div class="filter-cluster">
+        <span class="filter-label">자료 범위</span>
+        <div class="chip-group" data-filter-group="scope">
+          <button class="filter-chip is-active" type="button" data-value="">전체</button>
+          <button class="filter-chip" type="button" data-value="event">오늘 연수 자료</button>
+          <button class="filter-chip" type="button" data-value="evergreen">공통 자료</button>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="filter-cluster">
-          <span class="filter-label">자료 범위</span>
-          <div class="chip-group" data-filter-group="scope">
-            <button class="filter-chip is-active" type="button" data-value="">전체</button>
-            <button class="filter-chip" type="button" data-value="event">회차 자료</button>
-            <button class="filter-chip" type="button" data-value="evergreen">상시 자료</button>
-          </div>
+  <section class="container section">
+    <div class="library-feed library-feed--single">
+      <div class="library-feed__header">
+        <div>
+          <p class="eyebrow">Downloads</p>
+          <h2>다운로드 리스트</h2>
         </div>
       </div>
 
@@ -51,14 +67,15 @@ const types = [...new Set(resources.map((resource) => resource.data.type))];
   </section>
 
   <section class="container section">
-    <div class="content-panel">
-      <div class="section-header">
+    <div class="library-feed library-feed--single">
+      <div class="library-feed__header">
         <div>
           <p class="eyebrow">Gallery Preview</p>
-          <h2>강사 예시 갤러리</h2>
+          <h2>함께 보면 좋은 사례</h2>
         </div>
-        <a class="button secondary compact" href={`${import.meta.env.BASE_URL}gallery`}>전체 갤러리 보기</a>
+        <a class="button ghost compact" href={`${import.meta.env.BASE_URL}gallery`}>사례 전체 보기</a>
       </div>
+
       <div class="gallery-grid gallery-grid--triple">
         {gallery.slice(0, 3).map((item) => <GalleryCard item={item} />)}
       </div>
@@ -76,10 +93,23 @@ const types = [...new Set(resources.map((resource) => resource.data.type))];
     };
 
     if (searchInput instanceof HTMLInputElement) {
+      const params = new URLSearchParams(window.location.search);
+      searchInput.value = params.get("q") ?? "";
+
       const dataset = cards.map((card) => {
         const payload = JSON.parse(card.getAttribute("data-searchable") ?? "{}");
         return { element: card, ...payload };
       });
+
+      const syncQuery = (query: string) => {
+        const url = new URL(window.location.href);
+        if (query) {
+          url.searchParams.set("q", query);
+        } else {
+          url.searchParams.delete("q");
+        }
+        window.history.replaceState({}, "", url);
+      };
 
       const render = () => {
         const query = searchInput.value.trim().toLowerCase();
@@ -116,7 +146,11 @@ const types = [...new Set(resources.map((resource) => resource.data.type))];
         });
       });
 
-      searchInput.addEventListener("input", render);
+      searchInput.addEventListener("input", () => {
+        syncQuery(searchInput.value.trim());
+        render();
+      });
+
       render();
     }
   </script>

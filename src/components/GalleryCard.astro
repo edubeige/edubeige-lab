@@ -10,24 +10,24 @@ const { item } = Astro.props;
 ---
 
 <article
-  class="gallery-card"
+  class="library-gallery-card"
   data-gallery-card
   data-tool={toUiToken(item.data.tool)}
   data-searchable={JSON.stringify(item.data)}
 >
-  <div class="gallery-card__media">
+  <div class="library-gallery-card__media">
     <img src={item.data.thumbnail} alt={item.data.title} loading="lazy" />
-    <div class="gallery-card__overlay">
-      <span class="badge badge--tool">{item.data.tool}</span>
-      <span class="badge badge--light">{item.data.subjects.join(", ")}</span>
+    <div class="library-gallery-card__overlay">
+      <span class="library-pill">{item.data.tool}</span>
     </div>
   </div>
-  <div class="gallery-card__body">
+
+  <div class="library-gallery-card__body">
     <h3>{item.data.title}</h3>
     <p>{item.data.summary}</p>
-    <small>{item.data.detail}</small>
     <div class="tag-row tag-row--compact">
       {item.data.purposes.map((purpose) => <span class="tag">{purpose}</span>)}
     </div>
+    <small>{item.data.detail}</small>
   </div>
 </article>

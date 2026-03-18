@@ -3,7 +3,15 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../components/BaseLayout.astro";
 import PromptCard from "../../components/PromptCard.astro";
 import ResourceCard from "../../components/ResourceCard.astro";
-import { byIds, getEvents, getPrompts, getResources } from "../../lib/site";
+import WorkspaceSidebar from "../../components/WorkspaceSidebar.astro";
+import { getAdjacentModules, getPromptCuration } from "../../lib/presentation";
+import {
+  byIds,
+  getEvents,
+  getModulesByEventId,
+  getPrompts,
+  getResources,
+} from "../../lib/site";
 
 export async function getStaticPaths() {
   const modules = await getCollection("modules");
@@ -15,136 +23,165 @@ export async function getStaticPaths() {
 
 const { module } = Astro.props;
 const events = await getEvents();
+const event = events.find((item) => item.data.id === module.data.eventId);
+const eventModules = await getModulesByEventId(module.data.eventId);
 const prompts = await getPrompts();
 const resources = await getResources();
-const event = events.find((item) => item.data.id === module.data.eventId);
+
 const relatedPrompts = byIds(prompts, module.data.promptIds);
 const relatedResources = byIds(resources, module.data.resourceIds);
-const moduleLabel = `MODULE ${String(module.data.order).padStart(2, "0")}`;
+const heroPrompt = relatedPrompts[0];
+const heroPromptMeta = heroPrompt ? getPromptCuration(heroPrompt.data.id) : undefined;
+const adjacent = getAdjacentModules(eventModules, module.data.slug);
 ---
 
-<BaseLayout title={`${module.data.title} | edubeige-lab`} navSection="events">
-  <section class="hero-section hero-section--compact">
-    <div class="container">
-      <div class="module-hero">
-        <div class="module-hero__content">
-          <span class="pill pill--soft">{moduleLabel}</span>
-          <h1>{module.data.order}교시: {module.data.title}</h1>
-          <p class="module-hero__summary">
-            이 페이지는 이 차시를 그대로 따라 하는 실습 안내서입니다.
-            준비를 확인한 뒤, 아래 단계를 순서대로 따라가면 됩니다.
-          </p>
-
-          <div class="tag-row">
-            <span class="tag tag--dark">{module.data.startTime} - {module.data.endTime}</span>
-            {module.data.tags.map((tag) => <span class="tag">{tag}</span>)}
-          </div>
-
-          <div class="button-row">
-            {event && <a class="button secondary" href={`${import.meta.env.BASE_URL}events/${event.data.slug}`}>전체 연수로 돌아가기</a>}
-            <a class="button ghost" href={`${import.meta.env.BASE_URL}faq`}>막히면 해결 방법 보기</a>
-          </div>
-        </div>
-
-        <aside class="module-hero__aside">
-          <span class="module-hero__eyebrow">이 차시에서 하게 될 일</span>
-          <div class="goal-list">
-            {module.data.learningGoals.map((goal) => (
-              <div class="goal-item">
-                <strong>학습 목표</strong>
-                <p>{goal}</p>
-              </div>
-            ))}
-          </div>
-        </aside>
-      </div>
-    </div>
-  </section>
-
+<BaseLayout title={`${module.data.title} | edubeige-lab`} navSection="events" shell="workspace">
   <section class="container section">
-    <div class="module-board">
-      <div class="content-panel content-panel--tight">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Step 1</p>
-            <h2>실습 준비하기</h2>
-          </div>
-        </div>
+    <div class="workspace-layout">
+      <WorkspaceSidebar
+        modules={eventModules}
+        currentSlug={module.data.slug}
+        title="현재 진행률"
+        summary={module.data.learningGoals[0] ?? module.data.summary}
+      />
 
-        <div class="checklist-stack">
-          {module.data.checklist.map((item) => (
-            <label class="checklist-item">
-              <input type="checkbox" />
-              <span>{item}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      <div class="workspace-main">
+        <nav class="workspace-breadcrumb" aria-label="경로">
+          {event && <a href={`${import.meta.env.BASE_URL}events/${event.data.slug}`}>{event.data.title}</a>}
+          <span>›</span>
+          <span>{module.data.order}단계</span>
+        </nav>
 
-      <div class="content-panel">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Step 2</p>
-            <h2>순서대로 따라하기</h2>
-          </div>
-        </div>
+        <header class="workspace-lead">
+          <p class="workspace-lead__eyebrow">Step {String(module.data.order).padStart(2, "0")}</p>
+          <h1>{module.data.title}</h1>
+          <p>{module.data.summary}</p>
+        </header>
 
-        <div class="guide-flow">
-          {module.data.steps.map((step, index) => (
-            <div class="guide-step">
-              <div class="guide-step__marker">{index + 1}</div>
-              <div class="guide-step__card">
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
+        {heroPrompt && (
+          <section class="workspace-stage">
+            <div class="workspace-stage__top">
+              <div>
+                <p class="eyebrow">프롬프트 샌드박스</p>
+                <h2>{heroPrompt.data.title}</h2>
+              </div>
+              <div class="workspace-stage__badges">
+                <span class="workspace-state-chip">{heroPromptMeta?.category ?? "핵심 프롬프트"}</span>
+                {heroPromptMeta?.rating && <span class="workspace-rating-chip">★ {heroPromptMeta.rating}</span>}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="container section">
-    <div class="split-grid">
-      <div class="content-panel">
-        <div class="section-header">
+            <div class="workspace-stage__surface">
+              <div class="workspace-sandbox">
+                <p>{heroPrompt.data.template}</p>
+              </div>
+
+              <div class="workspace-stage__actions">
+                <button class="button" type="button" data-copy={heroPrompt.data.template}>프롬프트 복사하기</button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <div class="workspace-subgrid">
+          <section class="workspace-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">실습 준비</p>
+                <h2>체크하고 시작하기</h2>
+              </div>
+            </div>
+            <div class="checklist-stack">
+              {module.data.checklist.map((item) => (
+                <label class="checklist-item">
+                  <input type="checkbox" />
+                  <span>{item}</span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section class="workspace-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">실습 순서</p>
+                <h2>이 순서대로 따라오기</h2>
+              </div>
+            </div>
+            <div class="guide-flow">
+              {module.data.steps.map((step, index) => (
+                <div class="guide-step">
+                  <div class="guide-step__marker">{index + 1}</div>
+                  <div class="guide-step__card">
+                    <h3>{step.title}</h3>
+                    <p>{step.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {relatedPrompts.length > 0 && (
+          <section class="workspace-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">관련 라이브러리</p>
+                <h2>함께 쓰면 좋은 프롬프트</h2>
+              </div>
+            </div>
+            <div class="library-prompt-grid library-prompt-grid--compact">
+              {relatedPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
+            </div>
+          </section>
+        )}
+
+        {relatedResources.length > 0 && (
+          <section class="workspace-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">관련 자료</p>
+                <h2>실습에 필요한 파일</h2>
+              </div>
+            </div>
+            <div class="resource-list">
+              {relatedResources.map((resource) => <ResourceCard resource={resource} />)}
+            </div>
+          </section>
+        )}
+
+        <div class="workspace-nav-actions">
+          {adjacent.previous ? (
+            <a class="button secondary" href={`${import.meta.env.BASE_URL}modules/${adjacent.previous.data.slug}`}>
+              이전 단계로
+            </a>
+          ) : (
+            <span></span>
+          )}
+
+          {adjacent.next ? (
+            <a class="button" href={`${import.meta.env.BASE_URL}modules/${adjacent.next.data.slug}`}>
+              다음 단계로
+            </a>
+          ) : (
+            <a class="button" href={event ? `${import.meta.env.BASE_URL}events/${event.data.slug}` : `${import.meta.env.BASE_URL}`}>
+              과정 개요로 돌아가기
+            </a>
+          )}
+        </div>
+
+        <section class="workspace-share-banner">
           <div>
-            <p class="eyebrow">Step 3</p>
-            <h2>그대로 복사해서 쓰기</h2>
+            <p class="eyebrow">결과 공유</p>
+            <h2>마지막에는 결과를 공유하세요</h2>
+            <p>실습 결과를 공유하고, 다른 선생님들의 결과물도 함께 참고하면서 아이디어를 확장해보세요.</p>
           </div>
-        </div>
-
-        <div class="prompt-grid prompt-grid--compact">
-          {relatedPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
-        </div>
-      </div>
-
-      <div class="content-panel">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Support Materials</p>
-            <h2>필요한 자료 받기</h2>
+          <div class="button-row">
+            {module.data.shareLinks.map((link) => (
+              <a class="button secondary compact" href={link.url} target="_blank" rel="noreferrer">{link.label}</a>
+            ))}
           </div>
-        </div>
-
-        <div class="resource-list">
-          {relatedResources.map((resource) => <ResourceCard resource={resource} />)}
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="container section">
-    <div class="cta-banner cta-banner--guide">
-      <div>
-        <span class="eyebrow">Step 4</span>
-        <h2>마지막에 공유하기</h2>
-        <p>실습 결과를 공유하고 다른 선생님들의 결과물도 함께 보면서 아이디어를 확장해 보세요.</p>
-      </div>
-      <div class="button-row">
-        {module.data.shareLinks.map((link) => (
-          <a class="button" href={link.url} target="_blank" rel="noreferrer">{link.label}</a>
-        ))}
+        </section>
       </div>
     </div>
   </section>

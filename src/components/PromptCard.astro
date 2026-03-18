@@ -1,5 +1,6 @@
 ---
 import type { PromptEntry } from "../lib/site";
+import { getPromptCategory, getPromptCuration, getPromptTone } from "../lib/presentation";
 import { toUiToken } from "../lib/site";
 
 interface Props {
@@ -8,14 +9,18 @@ interface Props {
 
 const { prompt } = Astro.props;
 const bodyText = prompt.body.trim();
-const tags = [...prompt.data.subjects, ...prompt.data.purposes, ...prompt.data.trainingTypes];
+const curation = getPromptCuration(prompt.data.id);
+const tone = getPromptTone(prompt);
+const tags = [...prompt.data.subjects, ...prompt.data.purposes, ...prompt.data.trainingTypes].slice(0, 3);
 ---
 
 <article
-  class="prompt-card"
+  id={prompt.data.id}
+  class:list={["library-prompt-card", `library-prompt-card--${tone}`]}
   data-prompt-card
   data-tool={toUiToken(prompt.data.tool)}
   data-searchable={JSON.stringify({
+    id: prompt.data.id,
     title: prompt.data.title,
     summary: prompt.data.summary,
     tool: prompt.data.tool,
@@ -24,26 +29,31 @@ const tags = [...prompt.data.subjects, ...prompt.data.purposes, ...prompt.data.t
     trainingTypes: prompt.data.trainingTypes,
     difficulty: prompt.data.difficulty,
     body: bodyText,
+    template: prompt.data.template,
   })}
 >
-  <div class="prompt-card__top">
-    <div class="prompt-card__badges">
-      <span class="badge badge--tool">{prompt.data.tool}</span>
-      <span class="badge badge--neutral">{prompt.data.difficulty}</span>
+  <div class="library-prompt-card__meta">
+    <div class="library-prompt-card__badges">
+      <span class="library-pill">{getPromptCategory(prompt)}</span>
+      {curation.status && <span class="library-status">{curation.status}</span>}
     </div>
-    <span class="prompt-card__copy-hint">복사하여 바로 사용</span>
+    {curation.rating && <span class="library-rating">★ {curation.rating}</span>}
   </div>
-  <h3>{prompt.data.title}</h3>
-  <p class="prompt-card__summary">{prompt.data.summary}</p>
-  <div class="tag-row tag-row--compact">
-    {tags.map((tag) => <span class="tag">{tag}</span>)}
+
+  <div class="library-prompt-card__content">
+    <p class="library-prompt-card__kicker">{curation.kicker ?? "바로 복사해서 활용"}</p>
+    <h3>{prompt.data.title}</h3>
+    <p class="library-prompt-card__summary">{prompt.data.summary}</p>
   </div>
-  <div class="prompt-card__preview">
-    <strong>템플릿 미리보기</strong>
+
+  <div class="library-prompt-card__preview">
     <p>{prompt.data.template}</p>
   </div>
-  <div class="prompt-card__footer">
-    <span>{prompt.data.notes}</span>
-    <button class="button" type="button" data-copy={prompt.data.template}>프롬프트 복사</button>
+
+  <div class="library-prompt-card__footer">
+    <div class="tag-row tag-row--compact">
+      {tags.map((tag) => <span class="tag">{tag}</span>)}
+    </div>
+    <button class="button secondary compact" type="button" data-copy={prompt.data.template}>프롬프트 복사</button>
   </div>
 </article>

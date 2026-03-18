@@ -7,42 +7,31 @@ interface Props {
 }
 
 const { resource } = Astro.props;
+const typeToken = toUiToken(resource.data.type);
 const typeLabel = resource.data.type.toUpperCase();
-const iconLabel =
-  resource.data.type === "pdf" ? "PDF" :
-  resource.data.type === "hwp" ? "HWP" :
-  resource.data.type === "pptx" ? "PPT" :
-  resource.data.type === "link" ? "LINK" :
-  typeLabel;
-
 const scopeLabel = resource.data.scope === "event" ? "오늘 연수 자료" : "공통 자료";
-const helperLabel = resource.data.scope === "event" ? "연수 중 바로 여는 자료" : "반복해서 참고하는 공통 자료";
 ---
 
 <article
-  class="resource-card"
+  class="library-resource-card"
   data-resource-card
-  data-type={toUiToken(resource.data.type)}
+  data-type={typeToken}
   data-scope={resource.data.scope}
   data-searchable={JSON.stringify(resource.data)}
 >
-  <div class="resource-card__icon" data-type={toUiToken(resource.data.type)}>
-    <span>{iconLabel}</span>
-  </div>
+  <div class="library-resource-card__icon" data-type={typeToken}>{typeLabel}</div>
 
-  <div class="resource-card__body">
-    <div class="resource-card__meta">
-      <span class="badge badge--neutral">{scopeLabel}</span>
-      <span class="badge badge--ghost">{typeLabel}</span>
+  <div class="library-resource-card__body">
+    <div class="library-resource-card__meta">
+      <span class="library-pill">{scopeLabel}</span>
+      <span class="library-resource-card__type">{typeLabel}</span>
     </div>
     <h3>{resource.data.title}</h3>
     <p>{resource.data.description}</p>
   </div>
 
-  <div class="resource-card__actions">
-    <small>{helperLabel}</small>
-    <a class="button secondary compact" href={resource.data.url} target="_blank" rel="noreferrer">
-      {resource.data.downloadLabel}
-    </a>
+  <div class="library-resource-card__actions">
+    <small>{resource.data.scope === "event" ? "연수 중 바로 여는 자료" : "반복 참고용 자료"}</small>
+    <a class="button secondary compact" href={resource.data.url} target="_blank" rel="noreferrer">{resource.data.downloadLabel}</a>
   </div>
 </article>

@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../../components/BaseLayout.astro";
 import GalleryCard from "../../components/GalleryCard.astro";
-import PageIntro from "../../components/PageIntro.astro";
 import { getGalleryItems } from "../../lib/site";
 
 const gallery = await getGalleryItems();
@@ -9,35 +8,53 @@ const tools = [...new Set(gallery.map((item) => item.data.tool))];
 const purposes = [...new Set(gallery.flatMap((item) => item.data.purposes))];
 ---
 
-<BaseLayout title="사례 갤러리 | edubeige-lab" navSection="gallery">
-  <PageIntro
-    eyebrow="Gallery"
-    title="강사 예시 갤러리"
-    description="연수 후 실제 수업과 안내 페이지에 적용한 결과물을 카드형 아카이브로 모았습니다."
-    accent="도구와 활용 목적 중심 큐레이션"
-  />
+<BaseLayout
+  title="사례 갤러리 | edubeige-lab"
+  navSection="gallery"
+  shell="library"
+  searchAction={`${import.meta.env.BASE_URL}gallery`}
+  searchPlaceholder="사례를 검색해보세요..."
+>
+  <section class="library-hero library-hero--compact container">
+    <div class="library-hero__copy">
+      <p class="eyebrow">Showcase Archive</p>
+      <h1>실제 결과물을 모아 보는 사례 갤러리</h1>
+      <p class="library-hero__summary">
+        연수와 수업에서 만든 결과물을 사례 중심으로 모았습니다.
+        어떤 도구와 어떤 목적에 활용했는지 빠르게 살펴볼 수 있습니다.
+      </p>
+    </div>
 
-  <section class="container section">
-    <div class="content-panel content-panel--catalog">
-      <div class="search-stage">
-        <input id="gallery-search" class="search-input" type="search" placeholder="사례 제목 또는 설명 검색" />
+    <div class="library-hero__search">
+      <label class="visually-hidden" for="gallery-search">사례 검색</label>
+      <input id="gallery-search" class="search-input search-input--hero" type="search" placeholder="사례 제목이나 설명을 검색해보세요..." />
+    </div>
+
+    <div class="library-filter-row">
+      <div class="filter-cluster">
+        <span class="filter-label">도구</span>
+        <div class="chip-group" data-filter-group="tool">
+          <button class="filter-chip is-active" type="button" data-value="">전체</button>
+          {tools.map((tool) => <button class="filter-chip" type="button" data-value={tool}>{tool}</button>)}
+        </div>
       </div>
 
-      <div class="filter-stack">
-        <div class="filter-cluster">
-          <span class="filter-label">도구</span>
-          <div class="chip-group" data-filter-group="tool">
-            <button class="filter-chip is-active" type="button" data-value="">전체</button>
-            {tools.map((tool) => <button class="filter-chip" type="button" data-value={tool}>{tool}</button>)}
-          </div>
+      <div class="filter-cluster">
+        <span class="filter-label">활용 목적</span>
+        <div class="chip-group" data-filter-group="purpose">
+          <button class="filter-chip is-active" type="button" data-value="">전체</button>
+          {purposes.map((purpose) => <button class="filter-chip" type="button" data-value={purpose}>{purpose}</button>)}
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="filter-cluster">
-          <span class="filter-label">활용 목적</span>
-          <div class="chip-group" data-filter-group="purpose">
-            <button class="filter-chip is-active" type="button" data-value="">전체</button>
-            {purposes.map((purpose) => <button class="filter-chip" type="button" data-value={purpose}>{purpose}</button>)}
-          </div>
+  <section class="container section">
+    <div class="library-feed library-feed--single">
+      <div class="library-feed__header">
+        <div>
+          <p class="eyebrow">Gallery Feed</p>
+          <h2>사례 아카이브</h2>
         </div>
       </div>
 
@@ -59,10 +76,23 @@ const purposes = [...new Set(gallery.flatMap((item) => item.data.purposes))];
     };
 
     if (searchInput instanceof HTMLInputElement) {
+      const params = new URLSearchParams(window.location.search);
+      searchInput.value = params.get("q") ?? "";
+
       const dataset = cards.map((card) => {
         const payload = JSON.parse(card.getAttribute("data-searchable") ?? "{}");
         return { element: card, ...payload };
       });
+
+      const syncQuery = (query: string) => {
+        const url = new URL(window.location.href);
+        if (query) {
+          url.searchParams.set("q", query);
+        } else {
+          url.searchParams.delete("q");
+        }
+        window.history.replaceState({}, "", url);
+      };
 
       const render = () => {
         const query = searchInput.value.trim().toLowerCase();
@@ -99,7 +129,11 @@ const purposes = [...new Set(gallery.flatMap((item) => item.data.purposes))];
         });
       });
 
-      searchInput.addEventListener("input", render);
+      searchInput.addEventListener("input", () => {
+        syncQuery(searchInput.value.trim());
+        render();
+      });
+
       render();
     }
   </script>

@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../components/BaseLayout.astro";
-import GalleryCard from "../components/GalleryCard.astro";
 import PromptCard from "../components/PromptCard.astro";
 import ResourceCard from "../components/ResourceCard.astro";
 import ScheduleCard from "../components/ScheduleCard.astro";
@@ -9,7 +8,6 @@ import {
   createPath,
   formatDate,
   getEventBySlug,
-  getGalleryItems,
   getModulesByEventId,
   getPrompts,
   getResources,
@@ -29,245 +27,109 @@ if (!featuredEvent) {
 const modules = await getModulesByEventId(featuredEvent.data.id);
 const prompts = await getPrompts();
 const resources = await getResources();
-const gallery = await getGalleryItems();
 
 const featuredPromptIds = [...new Set(modules.flatMap((module) => module.data.promptIds))].slice(0, 2);
 const featuredPrompts = byIds(prompts, featuredPromptIds);
-const featuredResources = byIds(resources, featuredEvent.data.resourceIds);
-const featuredGallery = byIds(gallery, featuredEvent.data.galleryIds).slice(0, 3);
+const featuredResources = byIds(resources, featuredEvent.data.resourceIds).slice(0, 2);
 
-const firstModule = modules[0];
 const prepLink = featuredEvent.data.quickLinks.find((link) => link.label.includes("준비") || link.url.includes("faq"));
-const shareLink =
-  modules.flatMap((module) => module.data.shareLinks)[0] ??
-  featuredEvent.data.quickLinks.find((link) => link.label.toLowerCase().includes("padlet") || link.label.includes("공유"));
-
-const preparationItems = [
-  ...featuredEvent.data.notices.slice(0, 2),
-  `${featuredEvent.data.toolLinks.map((tool) => tool.label).join(", ")} 링크를 미리 열어두면 연수 중 덜 막힙니다.`,
-].slice(0, 3);
+const firstModule = modules[0];
 ---
 
 <BaseLayout
   title="edubeige-lab"
-  description="처음 온 선생님도 준비, 실습, 공유까지 순서대로 따라갈 수 있는 AI 연수 안내서"
+  description="AI 연수를 처음 시작하는 교사도 단계별로 따라올 수 있는 프리미엄 연수 가이드"
   navSection="guide"
+  shell="guide"
 >
-  <section class="hero-section">
-    <div class="container">
-      <div class="guide-hero">
-        <div class="guide-hero__main">
-          <p class="eyebrow">처음 오셨다면 여기서부터</p>
-          <h1>AI 연수를 처음 해도, 이 순서대로 따라오면 됩니다.</h1>
-          <p class="guide-hero__lead">
-            이 사이트는 오늘 연수에서 준비, 실습, 결과 공유까지 차근차근 따라가는 안내서입니다.
-            초보자 선생님도 아래 순서대로만 이동하면 길을 잃지 않도록 구성했습니다.
-          </p>
+  <section class="landing-hero container">
+    <div class="landing-hero__copy">
+      <p class="eyebrow">Guide Landing</p>
+      <h1>처음 시작하는 선생님도 오늘 연수를 차근차근 따라갈 수 있습니다.</h1>
+      <p class="landing-hero__summary">
+        edubeige-lab은 AI 연수에서 준비, 실습, 결과 공유까지 순서대로 안내하는 가이드입니다.
+        오늘 해야 할 일과 필요한 자료를 한 화면에서 바로 확인할 수 있도록 정리했습니다.
+      </p>
 
-          <div class="guide-meta">
-            <span class="tag tag--dark">{formatDate(featuredEvent.data.date)}</span>
-            <span class="tag">대상: AI 연수가 낯선 교사</span>
-            <span class="tag">장소: {featuredEvent.data.venue}</span>
-            <span class="tag">강사: {featuredEvent.data.speaker}</span>
-          </div>
+      <div class="landing-hero__meta">
+        <span class="library-pill">{formatDate(featuredEvent.data.date)}</span>
+        <span class="tag">장소: {featuredEvent.data.venue}</span>
+        <span class="tag">강사: {featuredEvent.data.speaker}</span>
+      </div>
 
-          <div class="button-row">
-            <a class="button" href="#start-here">준비부터 시작하기</a>
-            <a class="button secondary" href={`${import.meta.env.BASE_URL}events/${featuredEvent.data.slug}`}>오늘 연수 전체 보기</a>
-          </div>
-        </div>
-
-        <aside class="guide-hero__aside">
-          <div class="guide-answer">
-            <span>이 사이트는?</span>
-            <strong>오늘 연수를 순서대로 따라가는 안내서입니다.</strong>
-          </div>
-          <div class="guide-answer">
-            <span>누구를 위한 화면인가요?</span>
-            <strong>AI 연수가 아직 익숙하지 않은 선생님을 위한 화면입니다.</strong>
-          </div>
-          <div class="guide-answer">
-            <span>무엇부터 해야 하나요?</span>
-            <strong>먼저 준비사항을 확인하고, 그다음 교시 카드로 들어가면 됩니다.</strong>
-          </div>
-          <div class="guide-answer">
-            <span>마지막에는?</span>
-            <strong>실습 결과를 공유 링크에 올리고 마무리하면 됩니다.</strong>
-          </div>
-        </aside>
+      <div class="button-row">
+        <a class="button" href={firstModule ? `${import.meta.env.BASE_URL}modules/${firstModule.data.slug}` : `${import.meta.env.BASE_URL}events/${featuredEvent.data.slug}`}>
+          오늘 연수 시작
+        </a>
+        <a class="button secondary" href={`${import.meta.env.BASE_URL}prompts`}>프롬프트 라이브러리</a>
       </div>
     </div>
+
+    <aside class="landing-hero__panel">
+      <p class="landing-hero__panel-eyebrow">오늘 과정 미리보기</p>
+      <ul class="landing-hero__steps">
+        {modules.map((module, index) => (
+          <li>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <div>
+              <strong>{module.data.title}</strong>
+              <small>{module.data.startTime} - {module.data.endTime}</small>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </aside>
   </section>
 
-  <section id="start-here" class="container section">
-    <div class="content-panel">
-      <div class="section-header section-header--stacked">
-        <div>
-          <p class="eyebrow">Start Here</p>
-          <h2>처음 오셨다면 이 순서로 하세요</h2>
-          <p class="section-summary">아래 1, 2, 3만 따라가면 준비부터 실습, 결과 공유까지 한 번에 끝낼 수 있습니다.</p>
-        </div>
-      </div>
+  <section class="container section">
+    <div class="landing-quick-grid">
+      <a class="landing-quick-card is-primary" href={prepLink ? createPath(import.meta.env.BASE_URL, prepLink.url) : `${import.meta.env.BASE_URL}faq`}>
+        <span>Step 01</span>
+        <strong>준비 체크하기</strong>
+        <p>로그인, 브라우저, 학교망 문제를 먼저 확인하고 시작하세요.</p>
+      </a>
 
-      <div class="guide-steps">
-        <article class="guide-step-card">
-          <span class="guide-step-card__number">1</span>
-          <h3>시작 전 준비하기</h3>
-          <p>계정 로그인, 브라우저, 학교망 접속 상태를 먼저 확인하세요.</p>
-          <ul class="manual-list manual-list--compact">
-            {preparationItems.map((item) => <li>{item}</li>)}
-          </ul>
-          <a class="button secondary compact" href={prepLink ? createPath(import.meta.env.BASE_URL, prepLink.url) : `${import.meta.env.BASE_URL}faq`}>
-            준비 체크하러 가기
-          </a>
-        </article>
+      <a class="landing-quick-card" href={`${import.meta.env.BASE_URL}events/${featuredEvent.data.slug}`}>
+        <span>Step 02</span>
+        <strong>전체 과정 보기</strong>
+        <p>오늘 연수의 전체 흐름과 단계별 이동 경로를 한 번에 확인합니다.</p>
+      </a>
 
-        <article class="guide-step-card">
-          <span class="guide-step-card__number">2</span>
-          <h3>오늘 연수 따라가기</h3>
-          <p>교시 카드를 위에서 아래 순서대로 누르면 오늘 연수를 그대로 따라갈 수 있습니다.</p>
-          <ul class="manual-list manual-list--compact">
-            <li>총 {modules.length}개 차시를 순서대로 진행합니다.</li>
-            {firstModule && <li>첫 시작은 {firstModule.data.title} 모듈입니다.</li>}
-            <li>막히면 문제 해결 페이지를 먼저 확인하세요.</li>
-          </ul>
-          <a class="button secondary compact" href={firstModule ? `${import.meta.env.BASE_URL}modules/${firstModule.data.slug}` : `${import.meta.env.BASE_URL}events/${featuredEvent.data.slug}`}>
-            {firstModule ? "1교시 시작하기" : "오늘 연수 보기"}
-          </a>
-        </article>
-
-        <article class="guide-step-card">
-          <span class="guide-step-card__number">3</span>
-          <h3>결과 공유하기</h3>
-          <p>실습을 마친 뒤에는 오늘 만든 결과물을 공유 링크에 올리고 서로 참고하면 됩니다.</p>
-          <ul class="manual-list manual-list--compact">
-            <li>공유가 막히면 FAQ의 대체 안내를 먼저 확인하세요.</li>
-            <li>개인정보가 포함된 내용은 올리지 않도록 주의하세요.</li>
-            <li>공유 후에는 다른 사례도 함께 살펴보면 좋습니다.</li>
-          </ul>
-          <a class="button secondary compact" href={shareLink ? createPath(import.meta.env.BASE_URL, shareLink.url) : `${import.meta.env.BASE_URL}faq`} target={shareLink?.url.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
-            결과 공유하러 가기
-          </a>
-        </article>
-      </div>
+      <a class="landing-quick-card" href={`${import.meta.env.BASE_URL}faq`}>
+        <span>Step 03</span>
+        <strong>문제 해결 바로가기</strong>
+        <p>학교망, 복사, 접속 문제를 빠르게 확인할 수 있는 도움말입니다.</p>
+      </a>
     </div>
   </section>
 
   <section class="container section">
-    <div class="manual-grid">
-      <div class="content-panel">
+    <div class="landing-grid">
+      <div class="landing-section-card">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Step 1</p>
-            <h2>시작 전 준비하기</h2>
+            <p class="eyebrow">Today Schedule</p>
+            <h2>오늘 따라갈 단계</h2>
           </div>
-          <a class="button ghost compact" href={`${import.meta.env.BASE_URL}faq`}>문제 해결 보기</a>
+          <a class="button ghost compact" href={`${import.meta.env.BASE_URL}events/${featuredEvent.data.slug}`}>전체 과정 보기</a>
         </div>
 
-        <ul class="manual-list">
-          {preparationItems.map((item) => <li>{item}</li>)}
-          <li>실습에 필요한 링크는 아래 목록에서 미리 한 번 열어보세요.</li>
-        </ul>
-      </div>
-
-      <div class="content-panel content-panel--tight">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Ready Links</p>
-            <h2>미리 열어두면 좋은 링크</h2>
-          </div>
-        </div>
-
-        <div class="link-stack">
-          {prepLink && (
-            <a class="link-card" href={createPath(import.meta.env.BASE_URL, prepLink.url)} target={prepLink.url.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
-              <strong>{prepLink.label}</strong>
-              <small>처음 시작하는 선생님이라면 이 안내부터 먼저 확인하세요.</small>
-            </a>
-          )}
-
-          <a class="link-card" href={`${import.meta.env.BASE_URL}faq`}>
-            <strong>문제 해결 안내</strong>
-            <small>학교망, 복사, 로그인 문제를 빠르게 해결하는 페이지입니다.</small>
-          </a>
-
-          {featuredEvent.data.toolLinks.map((tool) => (
-            <a class="link-card" href={tool.url} target="_blank" rel="noreferrer">
-              <strong>{tool.label} 열기</strong>
-              <small>연수 전에 한 번 접속해 두면 진행이 훨씬 수월합니다.</small>
-            </a>
+        <div class="schedule-list">
+          {modules.map((module, index) => (
+            <ScheduleCard module={module} index={index} ctaLabel={`${index + 1}교시 열기`} />
           ))}
         </div>
       </div>
-    </div>
-  </section>
 
-  <section class="container section">
-    <div class="content-panel">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Step 2</p>
-          <h2>오늘 연수 순서 따라가기</h2>
-          <p class="section-summary">교시 카드를 위에서 아래로 누르면, 각 차시의 준비물과 실습 순서를 그대로 볼 수 있습니다.</p>
-        </div>
-        <a class="button secondary compact" href={`${import.meta.env.BASE_URL}events/${featuredEvent.data.slug}`}>전체 연수 안내 보기</a>
-      </div>
-
-      <div class="schedule-list">
-        {modules.map((module, index) => (
-          <ScheduleCard module={module} index={index} ctaLabel={`${index + 1}교시 시작하기`} />
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="container section">
-    <div class="cta-banner cta-banner--guide">
-      <div>
-        <span class="eyebrow">Step 3</span>
-        <h2>마지막에는 결과를 공유하세요</h2>
-        <p>실습 결과를 공유 링크에 올리면 다른 선생님들과 함께 사례를 나누고 나중에 다시 참고할 수 있습니다.</p>
-      </div>
-      <div class="button-row">
-        <a class="button" href={shareLink ? createPath(import.meta.env.BASE_URL, shareLink.url) : `${import.meta.env.BASE_URL}faq`} target={shareLink?.url.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
-          결과 공유하러 가기
-        </a>
-        <a class="button secondary" href={`${import.meta.env.BASE_URL}gallery`}>공유된 사례 보기</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="container section">
-    <div class="section-header section-header--stacked">
-      <div>
-        <p class="eyebrow">More Help</p>
-        <h2>연수 중 필요할 때 찾는 보조 자료</h2>
-        <p class="section-summary">아래 자료는 처음부터 다 볼 필요는 없고, 실습 중 막히거나 더 참고하고 싶을 때 열어보면 됩니다.</p>
-      </div>
-    </div>
-
-    <div class="split-grid">
-      <div class="content-panel">
+      <div class="landing-section-card landing-section-card--compact">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Prompt Help</p>
-            <h2>연수 중 바로 꺼내 쓰는 프롬프트</h2>
+            <p class="eyebrow">Resources</p>
+            <h2>오늘 필요한 자료</h2>
           </div>
-          <a class="button secondary compact" href={`${import.meta.env.BASE_URL}prompts`}>프롬프트 더 보기</a>
+          <a class="button ghost compact" href={`${import.meta.env.BASE_URL}resources`}>자료실</a>
         </div>
-        <div class="prompt-grid prompt-grid--compact">
-          {featuredPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
-        </div>
-      </div>
 
-      <div class="content-panel">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Resource Help</p>
-            <h2>연수 중 필요할 때 찾는 자료</h2>
-          </div>
-          <a class="button secondary compact" href={`${import.meta.env.BASE_URL}resources`}>자료 더 보기</a>
-        </div>
         <div class="resource-list">
           {featuredResources.map((resource) => <ResourceCard resource={resource} />)}
         </div>
@@ -276,17 +138,15 @@ const preparationItems = [
   </section>
 
   <section class="container section">
-    <div class="content-panel">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Examples</p>
-          <h2>수업에 바로 쓰는 예시</h2>
-          <p class="section-summary">다른 선생님들이 실제로 어떻게 결과물을 만들었는지 살펴보면, 실습을 마무리할 때 훨씬 수월합니다.</p>
-        </div>
-        <a class="button ghost compact" href={`${import.meta.env.BASE_URL}gallery`}>사례 더 보기</a>
+    <div class="landing-library-strip">
+      <div class="landing-library-strip__intro">
+        <p class="eyebrow">Premium Library</p>
+        <h2>실습 중 바로 꺼내 쓰는 프롬프트</h2>
+        <p>막히는 순간 바로 복사해서 쓸 수 있도록 핵심 프롬프트만 먼저 보여줍니다.</p>
       </div>
-      <div class="gallery-grid gallery-grid--triple">
-        {featuredGallery.map((item) => <GalleryCard item={item} />)}
+
+      <div class="prompt-grid prompt-grid--compact">
+        {featuredPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
       </div>
     </div>
   </section>

@@ -1,0 +1,51 @@
+---
+import type { ModuleEntry } from "../lib/site";
+import { getWorkspaceProgress, getWorkspaceStepLabel } from "../lib/presentation";
+
+interface Props {
+  modules: ModuleEntry[];
+  currentSlug?: string;
+  title: string;
+  summary: string;
+}
+
+const { modules, currentSlug, title, summary } = Astro.props;
+const progress = getWorkspaceProgress(modules, currentSlug);
+---
+
+<aside class="workspace-sidebar">
+  <div class="workspace-panel">
+    <p class="workspace-panel__eyebrow">학습 모듈</p>
+
+    <nav class="workspace-steps" aria-label="모듈 단계">
+      {modules.map((item, index) => (
+        <a
+          href={`${import.meta.env.BASE_URL}modules/${item.data.slug}`}
+          class:list={[
+            "workspace-step",
+            currentSlug === item.data.slug && "is-active",
+            !currentSlug && index === 0 && "is-recommended",
+          ]}
+        >
+          <span class="workspace-step__index">{getWorkspaceStepLabel(index)}</span>
+          <strong>{item.data.title}</strong>
+        </a>
+      ))}
+    </nav>
+  </div>
+
+  <div class="workspace-progress-card">
+    <p class="workspace-progress-card__eyebrow">오늘의 학습 목표</p>
+    <p class="workspace-progress-card__summary">{summary}</p>
+
+    <div class="workspace-progress">
+      <div class="workspace-progress__meta">
+        <span>{title}</span>
+        <strong>{progress.percent}%</strong>
+      </div>
+      <div class="workspace-progress__track">
+        <span class="workspace-progress__bar" style={`width:${progress.percent}%`}></span>
+      </div>
+    </div>
+  </div>
+</aside>

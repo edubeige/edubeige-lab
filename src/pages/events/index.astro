@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../../components/BaseLayout.astro";
 import EventCard from "../../components/EventCard.astro";
-import PageIntro from "../../components/PageIntro.astro";
 import { getEvents } from "../../lib/site";
 
 const events = await getEvents();
@@ -9,21 +8,25 @@ const featured = events.at(-1);
 const archive = events.slice(0, -1).reverse();
 ---
 
-<BaseLayout title="연수 일정 | edubeige-lab" navSection="events">
-  <PageIntro
-    eyebrow="Events"
-    title="연수 일정과 회차 아카이브"
-    description="이전 회차를 복제해 새 연수를 빠르게 운영할 수 있도록, 일정과 구조를 회차 중심으로 정리했습니다."
-    accent="복제 가능한 연수 포털 구조"
-  />
+<BaseLayout title="연수 과정 | edubeige-lab" navSection="events" shell="workspace">
+  <section class="library-hero library-hero--compact container">
+    <div class="library-hero__copy">
+      <p class="eyebrow">Course Archive</p>
+      <h1>연수 과정과 회차 아카이브</h1>
+      <p class="library-hero__summary">
+        현재 운영 중인 과정과 이전 연수 회차를 한눈에 정리했습니다.
+        필요할 때 전체 흐름을 복기하거나 다음 연수 설계의 참고 자료로 활용할 수 있습니다.
+      </p>
+    </div>
+  </section>
 
   {featured && (
     <section class="container section">
-      <div class="content-panel">
-        <div class="section-header">
+      <div class="library-feed library-feed--single">
+        <div class="library-feed__header">
           <div>
-            <p class="eyebrow">Current Event</p>
-            <h2>최근 운영 회차</h2>
+            <p class="eyebrow">Current Course</p>
+            <h2>현재 운영 중인 과정</h2>
           </div>
         </div>
         <EventCard event={featured} />
@@ -32,14 +35,15 @@ const archive = events.slice(0, -1).reverse();
   )}
 
   <section class="container section">
-    <div class="content-panel">
-      <div class="section-header">
+    <div class="library-feed library-feed--single">
+      <div class="library-feed__header">
         <div>
           <p class="eyebrow">Archive</p>
-          <h2>이전 회차</h2>
+          <h2>이전 과정</h2>
         </div>
-        <span class="section-meta">{archive.length}개 회차</span>
+        <span class="section-meta">{archive.length}개 과정</span>
       </div>
+
       <div class="event-grid">
         {archive.map((event) => <EventCard event={event} />)}
       </div>
