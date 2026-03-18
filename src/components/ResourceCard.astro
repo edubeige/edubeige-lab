@@ -14,6 +14,9 @@ const iconLabel =
   resource.data.type === "pptx" ? "PPT" :
   resource.data.type === "link" ? "LINK" :
   typeLabel;
+
+const scopeLabel = resource.data.scope === "event" ? "오늘 연수 자료" : "공통 자료";
+const helperLabel = resource.data.scope === "event" ? "연수 중 바로 여는 자료" : "반복해서 참고하는 공통 자료";
 ---
 
 <article
@@ -26,16 +29,20 @@ const iconLabel =
   <div class="resource-card__icon" data-type={toUiToken(resource.data.type)}>
     <span>{iconLabel}</span>
   </div>
+
   <div class="resource-card__body">
     <div class="resource-card__meta">
-      <span class="badge badge--neutral">{resource.data.scope === "event" ? "회차 자료" : "상시 자료"}</span>
+      <span class="badge badge--neutral">{scopeLabel}</span>
       <span class="badge badge--ghost">{typeLabel}</span>
     </div>
     <h3>{resource.data.title}</h3>
     <p>{resource.data.description}</p>
   </div>
+
   <div class="resource-card__actions">
-    <small>{resource.data.eventId ?? "공용 자료"}</small>
-    <a class="button secondary compact" href={resource.data.url} target="_blank" rel="noreferrer">{resource.data.downloadLabel}</a>
+    <small>{helperLabel}</small>
+    <a class="button secondary compact" href={resource.data.url} target="_blank" rel="noreferrer">
+      {resource.data.downloadLabel}
+    </a>
   </div>
 </article>

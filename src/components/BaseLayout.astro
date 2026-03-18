@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { getSiteConfig } from "../lib/site";
 
 interface Props {
   title: string;
@@ -9,17 +10,19 @@ interface Props {
 
 const {
   title,
-  description = "교원 연수 운영을 위한 실습형 콘텐츠 허브",
-  navSection = "home",
+  description = "AI 연수를 처음 시작하는 선생님을 위한 단계형 연수 안내서",
+  navSection = "guide",
 } = Astro.props;
 
+const site = await getSiteConfig();
+const todayHref = site
+  ? `${import.meta.env.BASE_URL}events/${site.data.featuredEventSlug}`
+  : `${import.meta.env.BASE_URL}events`;
+
 const navItems = [
-  { id: "home", href: "", label: "홈" },
-  { id: "events", href: "events", label: "연수 일정" },
-  { id: "prompts", href: "prompts", label: "프롬프트 허브" },
-  { id: "resources", href: "resources", label: "자료실" },
-  { id: "gallery", href: "gallery", label: "사례 갤러리" },
-  { id: "faq", href: "faq", label: "FAQ" },
+  { id: "guide", href: `${import.meta.env.BASE_URL}#start-here`, label: "시작하기" },
+  { id: "events", href: todayHref, label: "오늘 연수" },
+  { id: "faq", href: `${import.meta.env.BASE_URL}faq`, label: "문제 해결" },
 ];
 ---
 
@@ -39,13 +42,14 @@ const navItems = [
             <span class="brand-mark" aria-hidden="true">EB</span>
             <span class="brand-copy">
               <strong>edubeige-lab</strong>
-              <small>교원 연수 운영 허브</small>
+              <small>초보 선생님도 바로 따라가는 AI 연수 안내서</small>
             </span>
           </a>
+
           <nav class="site-nav" aria-label="주요 메뉴">
             {navItems.map((item) => (
               <a
-                href={`${import.meta.env.BASE_URL}${item.href}`}
+                href={item.href}
                 class:list={[
                   "site-nav__link",
                   navSection === item.id && "is-active",
@@ -55,30 +59,31 @@ const navItems = [
               </a>
             ))}
           </nav>
-          <div class="site-header__actions">
-            <span class="site-header__badge">GitHub Pages</span>
-            <a class="button secondary compact" href={`${import.meta.env.BASE_URL}admin`}>/admin</a>
-          </div>
         </div>
       </header>
+
       <main class="page-main">
         <slot />
       </main>
+
       <footer class="site-footer">
         <div class="container site-footer__inner">
           <div class="site-footer__brand">
             <strong>edubeige-lab</strong>
-            <p>학교 현장에서 바로 쓰는 연수 운영 포털과 콘텐츠 허브</p>
+            <p>오늘 연수에서 준비, 실습, 공유까지 순서대로 따라가는 교원 연수 안내서</p>
           </div>
+
           <div class="site-footer__links">
-            <a href={`${import.meta.env.BASE_URL}events`}>연수 일정</a>
             <a href={`${import.meta.env.BASE_URL}prompts`}>프롬프트 허브</a>
             <a href={`${import.meta.env.BASE_URL}resources`}>자료실</a>
+            <a href={`${import.meta.env.BASE_URL}gallery`}>사례 갤러리</a>
             <a href={`${import.meta.env.BASE_URL}faq`}>문제 해결</a>
+            <a href={`${import.meta.env.BASE_URL}admin`}>운영자</a>
           </div>
         </div>
       </footer>
     </div>
+
     <script>
       document.addEventListener("click", async (event) => {
         const target = event.target;
@@ -96,7 +101,7 @@ const navItems = [
           await navigator.clipboard.writeText(text);
           button.textContent = "복사 완료";
         } catch {
-          window.prompt("복사해서 사용하세요", text);
+          window.prompt("복사해서 사용하세요.", text);
           button.textContent = "복사 안내";
         }
 

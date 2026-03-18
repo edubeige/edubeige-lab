@@ -30,23 +30,28 @@ const moduleLabel = `MODULE ${String(module.data.order).padStart(2, "0")}`;
         <div class="module-hero__content">
           <span class="pill pill--soft">{moduleLabel}</span>
           <h1>{module.data.order}교시: {module.data.title}</h1>
-          <p class="module-hero__summary">{module.data.summary}</p>
+          <p class="module-hero__summary">
+            이 페이지는 이 차시를 그대로 따라 하는 실습 안내서입니다.
+            준비를 확인한 뒤, 아래 단계를 순서대로 따라가면 됩니다.
+          </p>
+
           <div class="tag-row">
             <span class="tag tag--dark">{module.data.startTime} - {module.data.endTime}</span>
             {module.data.tags.map((tag) => <span class="tag">{tag}</span>)}
           </div>
+
           <div class="button-row">
-            {event && <a class="button secondary" href={`${import.meta.env.BASE_URL}events/${event.data.slug}`}>회차로 돌아가기</a>}
-            <a class="button ghost" href={`${import.meta.env.BASE_URL}faq`}>문제 해결 보기</a>
+            {event && <a class="button secondary" href={`${import.meta.env.BASE_URL}events/${event.data.slug}`}>전체 연수로 돌아가기</a>}
+            <a class="button ghost" href={`${import.meta.env.BASE_URL}faq`}>막히면 해결 방법 보기</a>
           </div>
         </div>
 
         <aside class="module-hero__aside">
-          <span class="module-hero__eyebrow">이 모듈에서 얻는 것</span>
+          <span class="module-hero__eyebrow">이 차시에서 하게 될 일</span>
           <div class="goal-list">
             {module.data.learningGoals.map((goal) => (
               <div class="goal-item">
-                <strong>목표</strong>
+                <strong>학습 목표</strong>
                 <p>{goal}</p>
               </div>
             ))}
@@ -61,10 +66,11 @@ const moduleLabel = `MODULE ${String(module.data.order).padStart(2, "0")}`;
       <div class="content-panel content-panel--tight">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Checklist</p>
+            <p class="eyebrow">Step 1</p>
             <h2>실습 준비하기</h2>
           </div>
         </div>
+
         <div class="checklist-stack">
           {module.data.checklist.map((item) => (
             <label class="checklist-item">
@@ -78,10 +84,11 @@ const moduleLabel = `MODULE ${String(module.data.order).padStart(2, "0")}`;
       <div class="content-panel">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Guide</p>
-            <h2>단계별 실습 가이드</h2>
+            <p class="eyebrow">Step 2</p>
+            <h2>순서대로 따라하기</h2>
           </div>
         </div>
+
         <div class="guide-flow">
           {module.data.steps.map((step, index) => (
             <div class="guide-step">
@@ -102,10 +109,11 @@ const moduleLabel = `MODULE ${String(module.data.order).padStart(2, "0")}`;
       <div class="content-panel">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Prompt Cards</p>
-            <h2>복사하여 바로 쓰는 프롬프트 카드</h2>
+            <p class="eyebrow">Step 3</p>
+            <h2>그대로 복사해서 쓰기</h2>
           </div>
         </div>
+
         <div class="prompt-grid prompt-grid--compact">
           {relatedPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
         </div>
@@ -114,10 +122,11 @@ const moduleLabel = `MODULE ${String(module.data.order).padStart(2, "0")}`;
       <div class="content-panel">
         <div class="section-header">
           <div>
-            <p class="eyebrow">Resources</p>
-            <h2>함께 보는 자료</h2>
+            <p class="eyebrow">Support Materials</p>
+            <h2>필요한 자료 받기</h2>
           </div>
         </div>
+
         <div class="resource-list">
           {relatedResources.map((resource) => <ResourceCard resource={resource} />)}
         </div>
@@ -126,11 +135,11 @@ const moduleLabel = `MODULE ${String(module.data.order).padStart(2, "0")}`;
   </section>
 
   <section class="container section">
-    <div class="cta-banner">
+    <div class="cta-banner cta-banner--guide">
       <div>
-        <span class="eyebrow">Share</span>
-        <h2>오늘의 결과물을 공유해 보세요</h2>
-        <p>모둠 결과를 공유하고, 이후 갤러리 사례로 다시 재활용할 수 있도록 흐름을 열어둡니다.</p>
+        <span class="eyebrow">Step 4</span>
+        <h2>마지막에 공유하기</h2>
+        <p>실습 결과를 공유하고 다른 선생님들의 결과물도 함께 보면서 아이디어를 확장해 보세요.</p>
       </div>
       <div class="button-row">
         {module.data.shareLinks.map((link) => (
