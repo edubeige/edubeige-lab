@@ -2,6 +2,27 @@
 
 GitHub Pages(`github.io`)에 배포하는 교원 연수용 정적 웹사이트의 기준 문서다. 이 문서는 기존 PRD를 바탕으로, 학교망 제약과 `GitHub Pages only` 운영 조건에 맞게 범위와 구현 방식을 현실화한 `PRD + 배포 가이드` 통합 문서다.
 
+## 가장 쉬운 배포
+
+이 저장소는 `main` 브랜치에 push되면 GitHub Actions가 자동으로 GitHub Pages에 배포된다. 가장 쉬운 방법은 저장소 폴더에서 아래 한 줄만 실행하는 것이다.
+
+```powershell
+.\deploy.cmd
+```
+
+이 명령은 아래 작업을 자동으로 처리한다.
+- `npm.cmd run check`
+- `npm.cmd run build`
+- `git add .`
+- 자동 커밋
+- `git push origin main`
+
+배포가 끝나면 사이트는 아래 주소에서 확인하면 된다.
+
+```text
+https://edubeige.github.io/edubeige-lab/
+```
+
 ## 1. 프로젝트 개요
 
 ### 목적

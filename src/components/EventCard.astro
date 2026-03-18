@@ -9,15 +9,15 @@ interface Props {
 const { event } = Astro.props;
 ---
 
-<article class="card event-card">
-  <div class="card-topline">
-    <span>{formatDate(event.data.date)}</span>
-    <span>{event.data.venue}</span>
+<article class="event-card">
+  <div class="event-card__meta">
+    <span class="pill pill--soft">{formatDate(event.data.date)}</span>
+    <span>{event.data.speaker}</span>
   </div>
   <h3>{event.data.title}</h3>
   <p>{event.data.heroSummary}</p>
-  <div class="card-meta">
-    <span>{event.data.speaker}</span>
-    <a href={`${import.meta.env.BASE_URL}events/${event.data.slug}`}>상세 보기</a>
+  <div class="event-card__footer">
+    <span>{event.data.venue}</span>
+    <a class="button secondary compact" href={`${import.meta.env.BASE_URL}events/${event.data.slug}`}>회차 보기</a>
   </div>
 </article>

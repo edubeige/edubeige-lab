@@ -1,10 +1,10 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../components/BaseLayout.astro";
+import GalleryCard from "../../components/GalleryCard.astro";
 import PromptCard from "../../components/PromptCard.astro";
 import ResourceCard from "../../components/ResourceCard.astro";
-import GalleryCard from "../../components/GalleryCard.astro";
-import PageIntro from "../../components/PageIntro.astro";
+import ScheduleCard from "../../components/ScheduleCard.astro";
 import {
   byIds,
   createPath,
@@ -35,135 +35,127 @@ const relatedResources = byIds(resources, event.data.resourceIds);
 const relatedGallery = byIds(gallery, event.data.galleryIds);
 ---
 
-<BaseLayout title={`${event.data.title} | edubeige-lab`} navLabel="Event">
-  <PageIntro
-    eyebrow="Event Detail"
-    title={event.data.title}
-    description={event.data.heroSummary}
-    accent={formatDate(event.data.date)}
-  />
-
-  <section class="container section">
-    <div class="two-column">
-      <div class="section-shell">
-        <div class="section-copy">
-          <div>
-            <p class="section-eyebrow">Overview</p>
-            <h2>회차 개요</h2>
+<BaseLayout title={`${event.data.title} | edubeige-lab`} navSection="events">
+  <section class="hero-section hero-section--compact">
+    <div class="container">
+      <div class="portal-hero portal-hero--event">
+        <div class="portal-hero__content">
+          <span class="pill pill--light">{formatDate(event.data.date)}</span>
+          <h1>{event.data.title}</h1>
+          <p class="portal-hero__summary">{event.data.heroSummary}</p>
+          <p class="portal-hero__meta">장소: {event.data.venue} | 강사: {event.data.speaker}</p>
+          <div class="button-row">
+            <a class="button" href={`${import.meta.env.BASE_URL}resources`}>자료실 보기</a>
+            <a class="button secondary" href={`${import.meta.env.BASE_URL}prompts`}>관련 프롬프트</a>
           </div>
         </div>
-        <div class="detail-list">
-          <div class="detail-item"><strong>날짜</strong><p>{formatDate(event.data.date)}</p></div>
-          <div class="detail-item"><strong>장소</strong><p>{event.data.venue}</p></div>
-          <div class="detail-item"><strong>강사</strong><p>{event.data.speaker}</p></div>
-        </div>
-      </div>
-      <div class="section-shell">
-        <div class="section-copy">
-          <div>
-            <p class="section-eyebrow">Notice</p>
-            <h2>공지와 준비사항</h2>
+        <div class="portal-hero__art" aria-hidden="true">
+          <div class="hero-signal hero-signal--light">
+            <span>회차 요약</span>
+            <strong>{modules.length}개 모듈</strong>
+            <small>준비사항, 링크, 자료를 한 번에 정리</small>
           </div>
-        </div>
-        <div class="notice-list">
-          {event.data.notices.map((notice) => <div class="notice-item">{notice}</div>)}
         </div>
       </div>
     </div>
   </section>
 
   <section class="container section">
-    <div class="section-shell">
-      <div class="section-copy">
-        <div>
-          <p class="section-eyebrow">Modules</p>
-          <h2>차시 구성</h2>
-        </div>
-      </div>
-      <div class="timeline">
-        {modules.map((module) => (
-          <a class="timeline-item" href={`${import.meta.env.BASE_URL}modules/${module.data.slug}`}>
-            <span class="timeline-time">{module.data.startTime}</span>
-            <div>
-              <h3>{module.data.title}</h3>
-              <p>{module.data.summary}</p>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="container section">
-    <div class="two-column">
-      <div class="section-shell">
-        <div class="section-head">
-          <div class="section-copy">
-            <div>
-              <p class="section-eyebrow">Resources</p>
-              <h2>회차 전용 자료</h2>
-            </div>
+    <div class="portal-main">
+      <div class="content-panel">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Modules</p>
+            <h2>회차 구성</h2>
           </div>
         </div>
-        <div class="card-grid">
-          {relatedResources.map((resource) => <ResourceCard resource={resource} />)}
+        <div class="schedule-list">
+          {modules.map((module, index) => <ScheduleCard module={module} index={index} />)}
         </div>
       </div>
-      <div class="section-shell">
-        <div class="section-head">
-          <div class="section-copy">
+
+      <aside class="sidebar-stack">
+        <div class="content-panel content-panel--tight">
+          <div class="section-header">
             <div>
-              <p class="section-eyebrow">Quick Links</p>
+              <p class="eyebrow">Notice</p>
+              <h2>공지와 준비사항</h2>
+            </div>
+          </div>
+          <div class="notice-stack">
+            {event.data.notices.map((notice) => (
+              <div class="notice-card">
+                <strong>체크포인트</strong>
+                <p>{notice}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="content-panel content-panel--tight">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Quick Links</p>
               <h2>실습 링크</h2>
             </div>
           </div>
+          <div class="link-stack">
+            {event.data.quickLinks.map((link) => (
+              <a class="link-card" href={createPath(import.meta.env.BASE_URL, link.url)} target={link.url.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
+                <strong>{link.label}</strong>
+                <small>{link.url.startsWith("http") ? "외부 서비스 바로가기" : "사이트 내부 이동"}</small>
+              </a>
+            ))}
+            {event.data.toolLinks.map((link) => (
+              <a class="link-card" href={link.url} target="_blank" rel="noreferrer">
+                <strong>{link.label}</strong>
+                <small>대체 링크는 FAQ에서 안내</small>
+              </a>
+            ))}
+          </div>
         </div>
-        <div class="link-grid">
-          {event.data.quickLinks.map((link) => (
-            <a class="quick-link" href={createPath(import.meta.env.BASE_URL, link.url)} target={link.url.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
-              <strong>{link.label}</strong>
-              <span class="muted">{link.url}</span>
-            </a>
-          ))}
-          {event.data.toolLinks.map((link) => (
-            <a class="tool-link" href={link.url} target="_blank" rel="noreferrer">
-              <strong>{link.label}</strong>
-              <span class="muted">바로가기</span>
-            </a>
-          ))}
+      </aside>
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="content-panel">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Resources</p>
+          <h2>회차 전용 자료</h2>
         </div>
+      </div>
+      <div class="resource-list">
+        {relatedResources.map((resource) => <ResourceCard resource={resource} />)}
       </div>
     </div>
   </section>
 
   <section class="container section">
-    <div class="section-shell">
-      <div class="section-head">
-        <div class="section-copy">
+    <div class="split-grid">
+      <div class="content-panel">
+        <div class="section-header">
           <div>
-            <p class="section-eyebrow">Prompt Bundle</p>
+            <p class="eyebrow">Prompt Bundle</p>
             <h2>관련 프롬프트</h2>
           </div>
         </div>
+        <div class="prompt-grid prompt-grid--compact">
+          {relatedPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
+        </div>
       </div>
-      <div class="card-grid">
-        {relatedPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
-      </div>
-    </div>
-  </section>
 
-  <section class="container section">
-    <div class="section-shell">
-      <div class="section-head">
-        <div class="section-copy">
+      <div class="content-panel">
+        <div class="section-header">
           <div>
-            <p class="section-eyebrow">Gallery</p>
+            <p class="eyebrow">Gallery</p>
             <h2>결과물 예시</h2>
           </div>
         </div>
-      </div>
-      <div class="card-grid">
-        {relatedGallery.map((item) => <GalleryCard item={item} />)}
+        <div class="gallery-grid gallery-grid--double">
+          {relatedGallery.map((item) => <GalleryCard item={item} />)}
+        </div>
       </div>
     </div>
   </section>

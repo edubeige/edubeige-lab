@@ -11,45 +11,58 @@ const purposes = [...new Set(prompts.flatMap((prompt) => prompt.data.purposes))]
 const trainingTypes = [...new Set(prompts.flatMap((prompt) => prompt.data.trainingTypes))];
 ---
 
-<BaseLayout title="프롬프트 허브 | edubeige-lab" navLabel="Prompts">
+<BaseLayout title="프롬프트 허브 | edubeige-lab" navSection="prompts">
   <PageIntro
     eyebrow="Prompt Hub"
     title="프롬프트 허브"
-    description="도구, 교과, 활용 목적, 연수 유형별로 필터링하면서 바로 복사해 사용할 수 있는 실습용 프롬프트 모음입니다."
-    accent="Fuse.js 기반 클라이언트 검색"
+    description="검색과 필터를 중심으로 필요한 수업 프롬프트를 빠르게 찾고, 바로 복사해 실습과 수업에 연결하는 카탈로그형 화면입니다."
+    accent="검색 중심 카탈로그"
   />
 
   <section class="container section">
-    <div class="section-shell filters">
-      <div class="section-copy">
-        <div>
-          <p class="section-eyebrow">Search & Filter</p>
-          <h2>원하는 프롬프트를 빠르게 찾기</h2>
+    <div class="content-panel content-panel--catalog">
+      <div class="search-stage">
+        <input id="prompt-search" class="search-input" type="search" placeholder="필요한 수업 프롬프트를 검색하세요. 예: 실험 보고서, 토론 활동, 루브릭" />
+      </div>
+
+      <div class="filter-stack">
+        <div class="filter-cluster">
+          <span class="filter-label">AI 도구</span>
+          <div class="chip-group" data-filter-group="tool">
+            <button class="filter-chip is-active" type="button" data-value="">전체</button>
+            {tools.map((tool) => <button class="filter-chip" type="button" data-value={tool}>{tool}</button>)}
+          </div>
+        </div>
+
+        <div class="filter-cluster">
+          <span class="filter-label">교과목</span>
+          <div class="chip-group" data-filter-group="subject">
+            <button class="filter-chip is-active" type="button" data-value="">전체</button>
+            {subjects.map((subject) => <button class="filter-chip" type="button" data-value={subject}>{subject}</button>)}
+          </div>
+        </div>
+
+        <div class="filter-cluster">
+          <span class="filter-label">활용 목적</span>
+          <div class="chip-group" data-filter-group="purpose">
+            <button class="filter-chip is-active" type="button" data-value="">전체</button>
+            {purposes.map((purpose) => <button class="filter-chip" type="button" data-value={purpose}>{purpose}</button>)}
+          </div>
+        </div>
+
+        <div class="filter-cluster">
+          <span class="filter-label">연수 유형</span>
+          <div class="chip-group" data-filter-group="training">
+            <button class="filter-chip is-active" type="button" data-value="">전체</button>
+            {trainingTypes.map((item) => <button class="filter-chip" type="button" data-value={item}>{item}</button>)}
+          </div>
         </div>
       </div>
-      <div class="filter-row">
-        <input id="prompt-search" type="search" placeholder="제목, 요약, 본문으로 검색" />
-        <select id="prompt-tool">
-          <option value="">도구 전체</option>
-          {tools.map((tool) => <option value={tool}>{tool}</option>)}
-        </select>
-        <select id="prompt-subject">
-          <option value="">교과 전체</option>
-          {subjects.map((subject) => <option value={subject}>{subject}</option>)}
-        </select>
-        <select id="prompt-purpose">
-          <option value="">활용 목적 전체</option>
-          {purposes.map((purpose) => <option value={purpose}>{purpose}</option>)}
-        </select>
-        <select id="prompt-training">
-          <option value="">연수 유형 전체</option>
-          {trainingTypes.map((item) => <option value={item}>{item}</option>)}
-        </select>
-      </div>
-      <div class="card-grid" id="prompt-grid">
+
+      <div class="prompt-grid" id="prompt-grid">
         {prompts.map((prompt) => <PromptCard prompt={prompt} />)}
       </div>
-      <div id="prompt-empty" class="empty-state hidden">조건에 맞는 프롬프트가 없습니다. 필터를 조금 넓혀 보세요.</div>
+      <div id="prompt-empty" class="empty-state hidden">조건에 맞는 프롬프트가 없습니다. 다른 교과나 활용 목적을 눌러 보세요.</div>
     </div>
   </section>
 
@@ -58,19 +71,16 @@ const trainingTypes = [...new Set(prompts.flatMap((prompt) => prompt.data.traini
 
     const cards = Array.from(document.querySelectorAll("[data-prompt-card]"));
     const searchInput = document.querySelector("#prompt-search");
-    const toolSelect = document.querySelector("#prompt-tool");
-    const subjectSelect = document.querySelector("#prompt-subject");
-    const purposeSelect = document.querySelector("#prompt-purpose");
-    const trainingSelect = document.querySelector("#prompt-training");
+    const filterGroups = Array.from(document.querySelectorAll("[data-filter-group]"));
     const emptyState = document.querySelector("#prompt-empty");
+    const filterState = {
+      tool: "",
+      subject: "",
+      purpose: "",
+      training: "",
+    };
 
-    if (
-      searchInput instanceof HTMLInputElement &&
-      toolSelect instanceof HTMLSelectElement &&
-      subjectSelect instanceof HTMLSelectElement &&
-      purposeSelect instanceof HTMLSelectElement &&
-      trainingSelect instanceof HTMLSelectElement
-    ) {
+    if (searchInput instanceof HTMLInputElement) {
       const dataset = cards.map((card) => {
         const payload = JSON.parse(card.getAttribute("data-searchable") ?? "{}");
         return { element: card, ...payload };
@@ -84,15 +94,14 @@ const trainingTypes = [...new Set(prompts.flatMap((prompt) => prompt.data.traini
       const render = () => {
         const query = searchInput.value.trim();
         const searchMatched = query ? new Set(fuse.search(query).map((entry) => entry.item.element)) : null;
-
         let visibleCount = 0;
 
         dataset.forEach((item) => {
           const matchesQuery = !searchMatched || searchMatched.has(item.element);
-          const matchesTool = !toolSelect.value || item.tool === toolSelect.value;
-          const matchesSubject = !subjectSelect.value || item.subjects.includes(subjectSelect.value);
-          const matchesPurpose = !purposeSelect.value || item.purposes.includes(purposeSelect.value);
-          const matchesTraining = !trainingSelect.value || item.trainingTypes.includes(trainingSelect.value);
+          const matchesTool = !filterState.tool || item.tool === filterState.tool;
+          const matchesSubject = !filterState.subject || item.subjects.includes(filterState.subject);
+          const matchesPurpose = !filterState.purpose || item.purposes.includes(filterState.purpose);
+          const matchesTraining = !filterState.training || item.trainingTypes.includes(filterState.training);
           const visible = matchesQuery && matchesTool && matchesSubject && matchesPurpose && matchesTraining;
           item.element.classList.toggle("hidden", !visible);
           if (visible) visibleCount += 1;
@@ -103,10 +112,27 @@ const trainingTypes = [...new Set(prompts.flatMap((prompt) => prompt.data.traini
         }
       };
 
-      [searchInput, toolSelect, subjectSelect, purposeSelect, trainingSelect].forEach((control) =>
-        control.addEventListener("input", render),
-      );
+      filterGroups.forEach((group) => {
+        group.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLButtonElement)) return;
 
+          const groupName = group.getAttribute("data-filter-group");
+          if (!groupName) return;
+
+          const nextValue = target.dataset.value ?? "";
+          if (groupName === "tool") filterState.tool = nextValue;
+          if (groupName === "subject") filterState.subject = nextValue;
+          if (groupName === "purpose") filterState.purpose = nextValue;
+          if (groupName === "training") filterState.training = nextValue;
+          Array.from(group.querySelectorAll("button")).forEach((button) => {
+            button.classList.toggle("is-active", button === target);
+          });
+          render();
+        });
+      });
+
+      searchInput.addEventListener("input", render);
       render();
     }
   </script>

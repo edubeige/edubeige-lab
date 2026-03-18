@@ -4,14 +4,23 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
-  navLabel?: string;
+  navSection?: string;
 }
 
 const {
   title,
   description = "교원 연수 운영을 위한 실습형 콘텐츠 허브",
-  navLabel = "홈",
+  navSection = "home",
 } = Astro.props;
+
+const navItems = [
+  { id: "home", href: "", label: "홈" },
+  { id: "events", href: "events", label: "연수 일정" },
+  { id: "prompts", href: "prompts", label: "프롬프트 허브" },
+  { id: "resources", href: "resources", label: "자료실" },
+  { id: "gallery", href: "gallery", label: "사례 갤러리" },
+  { id: "faq", href: "faq", label: "FAQ" },
+];
 ---
 
 <!doctype html>
@@ -23,40 +32,49 @@ const {
     <title>{title}</title>
   </head>
   <body>
-    <div class="page-shell">
+    <div class="app-shell">
       <header class="site-header">
-        <div class="container header-inner">
+        <div class="container site-header__inner">
           <a class="brand" href={`${import.meta.env.BASE_URL}`}>
-            <span class="brand-mark">EB</span>
-            <span>
+            <span class="brand-mark" aria-hidden="true">EB</span>
+            <span class="brand-copy">
               <strong>edubeige-lab</strong>
-              <small>{navLabel}</small>
+              <small>교원 연수 운영 허브</small>
             </span>
           </a>
           <nav class="site-nav" aria-label="주요 메뉴">
-            <a href={`${import.meta.env.BASE_URL}`}>홈</a>
-            <a href={`${import.meta.env.BASE_URL}events`}>연수 일정</a>
-            <a href={`${import.meta.env.BASE_URL}prompts`}>프롬프트</a>
-            <a href={`${import.meta.env.BASE_URL}resources`}>자료실</a>
-            <a href={`${import.meta.env.BASE_URL}gallery`}>사례</a>
-            <a href={`${import.meta.env.BASE_URL}faq`}>FAQ</a>
-            <a href={`${import.meta.env.BASE_URL}admin`}>관리자</a>
+            {navItems.map((item) => (
+              <a
+                href={`${import.meta.env.BASE_URL}${item.href}`}
+                class:list={[
+                  "site-nav__link",
+                  navSection === item.id && "is-active",
+                ]}
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
+          <div class="site-header__actions">
+            <span class="site-header__badge">GitHub Pages</span>
+            <a class="button secondary compact" href={`${import.meta.env.BASE_URL}admin`}>/admin</a>
+          </div>
         </div>
       </header>
       <main class="page-main">
         <slot />
       </main>
       <footer class="site-footer">
-        <div class="container footer-inner">
-          <div>
+        <div class="container site-footer__inner">
+          <div class="site-footer__brand">
             <strong>edubeige-lab</strong>
-            <p>GitHub Pages에 배포하는 교원 연수 운영 허브 MVP</p>
+            <p>학교 현장에서 바로 쓰는 연수 운영 포털과 콘텐츠 허브</p>
           </div>
-          <div class="footer-links">
+          <div class="site-footer__links">
             <a href={`${import.meta.env.BASE_URL}events`}>연수 일정</a>
+            <a href={`${import.meta.env.BASE_URL}prompts`}>프롬프트 허브</a>
             <a href={`${import.meta.env.BASE_URL}resources`}>자료실</a>
-            <a href={`${import.meta.env.BASE_URL}admin`}>/admin</a>
+            <a href={`${import.meta.env.BASE_URL}faq`}>문제 해결</a>
           </div>
         </div>
       </footer>

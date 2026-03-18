@@ -10,14 +10,14 @@ const { eyebrow, title, description, accent = "기준 운영 문서에서 출발
 ---
 
 <section class="page-intro container">
-  <div class="intro-card">
+  <div class="page-intro__inner">
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-    <div class="intro-grid">
+    <div class="page-intro__grid">
       <div>
         <h1>{title}</h1>
         <p>{description}</p>
       </div>
-      <aside class="intro-note">
+      <aside class="page-intro__note">
         <span>Focus</span>
         <strong>{accent}</strong>
       </aside>

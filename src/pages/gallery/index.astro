@@ -9,28 +9,39 @@ const tools = [...new Set(gallery.map((item) => item.data.tool))];
 const purposes = [...new Set(gallery.flatMap((item) => item.data.purposes))];
 ---
 
-<BaseLayout title="사례 갤러리 | edubeige-lab" navLabel="Gallery">
+<BaseLayout title="사례 갤러리 | edubeige-lab" navSection="gallery">
   <PageIntro
     eyebrow="Gallery"
-    title="적용 사례 갤러리"
-    description="연수 후 실제 수업이나 안내 페이지에 적용한 결과물을 카드형으로 모아 보는 공간입니다."
+    title="강사 예시 갤러리"
+    description="연수 후 실제 수업과 안내 페이지에 적용한 결과물을 카드형 아카이브로 모았습니다."
     accent="도구와 활용 목적 중심 큐레이션"
   />
 
   <section class="container section">
-    <div class="section-shell filters">
-      <div class="filter-row">
-        <input id="gallery-search" type="search" placeholder="사례 제목 또는 설명 검색" />
-        <select id="gallery-tool">
-          <option value="">도구 전체</option>
-          {tools.map((tool) => <option value={tool}>{tool}</option>)}
-        </select>
-        <select id="gallery-purpose">
-          <option value="">활용 목적 전체</option>
-          {purposes.map((purpose) => <option value={purpose}>{purpose}</option>)}
-        </select>
+    <div class="content-panel content-panel--catalog">
+      <div class="search-stage">
+        <input id="gallery-search" class="search-input" type="search" placeholder="사례 제목 또는 설명 검색" />
       </div>
-      <div class="card-grid" id="gallery-grid">
+
+      <div class="filter-stack">
+        <div class="filter-cluster">
+          <span class="filter-label">도구</span>
+          <div class="chip-group" data-filter-group="tool">
+            <button class="filter-chip is-active" type="button" data-value="">전체</button>
+            {tools.map((tool) => <button class="filter-chip" type="button" data-value={tool}>{tool}</button>)}
+          </div>
+        </div>
+
+        <div class="filter-cluster">
+          <span class="filter-label">활용 목적</span>
+          <div class="chip-group" data-filter-group="purpose">
+            <button class="filter-chip is-active" type="button" data-value="">전체</button>
+            {purposes.map((purpose) => <button class="filter-chip" type="button" data-value={purpose}>{purpose}</button>)}
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery-grid" id="gallery-grid">
         {gallery.map((item) => <GalleryCard item={item} />)}
       </div>
       <div id="gallery-empty" class="empty-state hidden">조건에 맞는 사례가 없습니다.</div>
@@ -40,15 +51,14 @@ const purposes = [...new Set(gallery.flatMap((item) => item.data.purposes))];
   <script>
     const cards = Array.from(document.querySelectorAll("[data-gallery-card]"));
     const searchInput = document.querySelector("#gallery-search");
-    const toolSelect = document.querySelector("#gallery-tool");
-    const purposeSelect = document.querySelector("#gallery-purpose");
+    const filterGroups = Array.from(document.querySelectorAll("[data-filter-group]"));
     const emptyState = document.querySelector("#gallery-empty");
+    const filterState = {
+      tool: "",
+      purpose: "",
+    };
 
-    if (
-      searchInput instanceof HTMLInputElement &&
-      toolSelect instanceof HTMLSelectElement &&
-      purposeSelect instanceof HTMLSelectElement
-    ) {
+    if (searchInput instanceof HTMLInputElement) {
       const dataset = cards.map((card) => {
         const payload = JSON.parse(card.getAttribute("data-searchable") ?? "{}");
         return { element: card, ...payload };
@@ -61,8 +71,8 @@ const purposes = [...new Set(gallery.flatMap((item) => item.data.purposes))];
         dataset.forEach((item) => {
           const haystack = `${item.title} ${item.summary} ${item.detail}`.toLowerCase();
           const matchesQuery = !query || haystack.includes(query);
-          const matchesTool = !toolSelect.value || item.tool === toolSelect.value;
-          const matchesPurpose = !purposeSelect.value || item.purposes.includes(purposeSelect.value);
+          const matchesTool = !filterState.tool || item.tool === filterState.tool;
+          const matchesPurpose = !filterState.purpose || item.purposes.includes(filterState.purpose);
           const visible = matchesQuery && matchesTool && matchesPurpose;
           item.element.classList.toggle("hidden", !visible);
           if (visible) visibleCount += 1;
@@ -73,7 +83,23 @@ const purposes = [...new Set(gallery.flatMap((item) => item.data.purposes))];
         }
       };
 
-      [searchInput, toolSelect, purposeSelect].forEach((control) => control.addEventListener("input", render));
+      filterGroups.forEach((group) => {
+        group.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLButtonElement)) return;
+          const groupName = group.getAttribute("data-filter-group");
+          if (!groupName) return;
+          const nextValue = target.dataset.value ?? "";
+          if (groupName === "tool") filterState.tool = nextValue;
+          if (groupName === "purpose") filterState.purpose = nextValue;
+          Array.from(group.querySelectorAll("button")).forEach((button) => {
+            button.classList.toggle("is-active", button === target);
+          });
+          render();
+        });
+      });
+
+      searchInput.addEventListener("input", render);
       render();
     }
   </script>

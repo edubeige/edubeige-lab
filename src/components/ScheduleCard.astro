@@ -1,0 +1,24 @@
+---
+import type { ModuleEntry } from "../lib/site";
+
+interface Props {
+  module: ModuleEntry;
+  index: number;
+}
+
+const { module, index } = Astro.props;
+---
+
+<a class="schedule-card" href={`${import.meta.env.BASE_URL}modules/${module.data.slug}`}>
+  <div class="schedule-card__slot">
+    <span class="schedule-card__period">{index + 1}교시</span>
+    <strong>{module.data.startTime} - {module.data.endTime}</strong>
+  </div>
+  <div class="schedule-card__body">
+    <h3>{module.data.title}</h3>
+    <p>{module.data.summary}</p>
+    <div class="tag-row tag-row--compact">
+      {module.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+    </div>
+  </div>
+</a>

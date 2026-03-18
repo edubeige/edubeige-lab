@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../components/BaseLayout.astro";
-import EventCard from "../components/EventCard.astro";
-import PageIntro from "../components/PageIntro.astro";
+import GalleryCard from "../components/GalleryCard.astro";
 import PromptCard from "../components/PromptCard.astro";
 import ResourceCard from "../components/ResourceCard.astro";
+import ScheduleCard from "../components/ScheduleCard.astro";
 import {
   byIds,
   createPath,
@@ -31,185 +31,151 @@ const prompts = await getPrompts();
 const resources = await getResources();
 const gallery = await getGalleryItems();
 
-const featuredPromptIds = [...new Set(modules.flatMap((module) => module.data.promptIds))].slice(0, 3);
+const featuredPromptIds = [...new Set(modules.flatMap((module) => module.data.promptIds))].slice(0, 2);
 const featuredPrompts = byIds(prompts, featuredPromptIds);
 const featuredResources = byIds(resources, featuredEvent.data.resourceIds);
-const featuredGallery = byIds(gallery, featuredEvent.data.galleryIds).slice(0, 2);
+const featuredGallery = byIds(gallery, featuredEvent.data.galleryIds).slice(0, 3);
 ---
 
-<BaseLayout title="edubeige-lab" description={site.data.siteSubtitle} navLabel="Today">
-  <PageIntro
-    eyebrow="GitHub Pages MVP"
-    title="교실로 바로 이어지는 연수 운영 허브"
-    description="오늘 연수의 흐름, 프롬프트, 자료, 실습 링크를 한 화면에서 정리한 교원 연수용 정적 사이트입니다."
-    accent="학교망 친화형 정적 사이트"
-  />
-
-  <section class="container section">
-    <div class="hero-panel">
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <p class="section-eyebrow">Featured Event</p>
+<BaseLayout title="edubeige-lab" description={site.data.siteSubtitle} navSection="home">
+  <section class="hero-section">
+    <div class="container">
+      <div class="portal-hero">
+        <div class="portal-hero__content">
+          <span class="pill pill--light">{formatDate(featuredEvent.data.date)}</span>
           <h1>{featuredEvent.data.title}</h1>
-          <p>{featuredEvent.data.heroSummary}</p>
-          <div class="hero-actions" style="margin-top: 1.5rem;">
+          <p class="portal-hero__summary">{featuredEvent.data.heroSummary}</p>
+          <p class="portal-hero__meta">장소: {featuredEvent.data.venue} | 강사: {featuredEvent.data.speaker}</p>
+          <div class="button-row">
             <a class="button" href={`${import.meta.env.BASE_URL}events/${featuredEvent.data.slug}`}>오늘 연수 보기</a>
             <a class="button secondary" href={`${import.meta.env.BASE_URL}prompts`}>프롬프트 허브</a>
-            <a class="button ghost" href={`${import.meta.env.BASE_URL}admin`}>/admin 작업대</a>
-          </div>
-          <div class="hero-stats">
-            <div class="stat-block">
-              <span>날짜</span>
-              <strong>{formatDate(featuredEvent.data.date)}</strong>
-            </div>
-            <div class="stat-block">
-              <span>장소</span>
-              <strong>{featuredEvent.data.venue}</strong>
-            </div>
-            <div class="stat-block">
-              <span>강사</span>
-              <strong>{featuredEvent.data.speaker}</strong>
-            </div>
           </div>
         </div>
-        <aside class="hero-aside">
-          <div class="section-shell">
-            <div class="section-copy">
-              <div>
-                <p class="section-eyebrow">Quick Start</p>
-                <h2>연수 전·중·후 바로가기</h2>
-              </div>
-            </div>
-            <div class="quick-grid">
-              {featuredEvent.data.quickLinks.map((link) => (
-                <a class="quick-link" href={createPath(site.data.siteBasePath, link.url)} target={link.url.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
-                  <strong>{link.label}</strong>
-                  <span class="muted">지금 필요한 핵심 링크로 바로 이동</span>
-                </a>
-              ))}
-              {featuredEvent.data.toolLinks.slice(0, 2).map((tool) => (
-                <a class="tool-link" href={tool.url} target="_blank" rel="noreferrer">
-                  <strong>{tool.label}</strong>
-                  <span class="muted">학교망에서 막히면 FAQ의 대체 안내 확인</span>
-                </a>
-              ))}
-            </div>
+        <div class="portal-hero__art" aria-hidden="true">
+          <div class="hero-orb"></div>
+          <div class="hero-signal">
+            <span>오늘 운영</span>
+            <strong>{modules.length}개 차시</strong>
+            <small>준비·실습·공유 흐름을 한 화면에 정리</small>
           </div>
-        </aside>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        {featuredEvent.data.quickLinks.slice(0, 3).map((link, index) => (
+          <a
+            class:list={[
+              "action-card",
+              index === 0 && "is-primary",
+            ]}
+            href={createPath(site.data.siteBasePath, link.url)}
+            target={link.url.startsWith("http") ? "_blank" : undefined}
+            rel="noreferrer"
+          >
+            <span class="action-card__kicker">{index === 0 ? "Digital Board" : "Quick Access"}</span>
+            <strong>{link.label}</strong>
+            <small>{index === 0 ? "오늘 연수에서 가장 먼저 열어둘 링크" : "연수 흐름을 끊지 않고 바로 이동"}</small>
+          </a>
+        ))}
       </div>
     </div>
   </section>
 
   <section class="container section">
-    <div class="two-column">
-      <div class="section-shell">
-        <div class="section-head">
-          <div class="section-copy">
-            <div>
-              <p class="section-eyebrow">Schedule</p>
-              <h2>오늘 일정</h2>
-              <p>현재 회차에서 바로 따라갈 수 있도록 모듈 순서대로 배치했습니다.</p>
-            </div>
-          </div>
-        </div>
-        <div class="timeline">
-          {modules.map((module) => (
-            <a class="timeline-item" href={`${import.meta.env.BASE_URL}modules/${module.data.slug}`}>
-              <span class="timeline-time">{module.data.startTime}</span>
-              <div>
-                <h3>{module.data.title}</h3>
-                <p>{module.data.summary}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-      <div class="section-shell">
-        <div class="section-copy">
+    <div class="portal-main">
+      <div class="content-panel">
+        <div class="section-header">
           <div>
-            <p class="section-eyebrow">Notices</p>
-            <h2>준비와 공지</h2>
+            <p class="eyebrow">Schedule</p>
+            <h2>연수 시간표</h2>
           </div>
+          <span class="section-meta">총 {modules.length}차시 운영</span>
         </div>
-        <div class="notice-list">
-          {featuredEvent.data.notices.map((notice) => <div class="notice-item">{notice}</div>)}
+        <div class="schedule-list">
+          {modules.map((module, index) => <ScheduleCard module={module} index={index} />)}
         </div>
       </div>
-    </div>
-  </section>
 
-  <section class="container section">
-    <div class="section-shell">
-      <div class="section-head">
-        <div class="section-copy">
-          <div>
-            <p class="section-eyebrow">Prompt Hub</p>
-            <h2>바로 가져다 쓰는 프롬프트</h2>
-            <p>실습에 바로 연결되는 대표 프롬프트를 먼저 보여줍니다.</p>
-          </div>
-        </div>
-        <a class="button secondary" href={`${import.meta.env.BASE_URL}prompts`}>전체 프롬프트 보기</a>
-      </div>
-      <div class="card-grid">
-        {featuredPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
-      </div>
-    </div>
-  </section>
-
-  <section class="container section">
-    <div class="two-column">
-      <div class="section-shell">
-        <div class="section-head">
-          <div class="section-copy">
+      <aside class="sidebar-stack">
+        <div class="content-panel content-panel--tight">
+          <div class="section-header">
             <div>
-              <p class="section-eyebrow">Resources</p>
-              <h2>오늘 자료</h2>
+              <p class="eyebrow">Notice</p>
+              <h2>공지 및 준비사항</h2>
             </div>
           </div>
+          <div class="notice-stack">
+            {featuredEvent.data.notices.map((notice) => (
+              <div class="notice-card">
+                <strong>운영 안내</strong>
+                <p>{notice}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div class="card-grid">
+
+        <div class="content-panel content-panel--tight">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Tools</p>
+              <h2>AI 도구 빠른 접속</h2>
+            </div>
+          </div>
+          <div class="tool-grid">
+            {featuredEvent.data.toolLinks.map((tool) => (
+              <a class="tool-card" href={tool.url} target="_blank" rel="noreferrer">
+                <span class="tool-card__icon">{tool.label.slice(0, 1)}</span>
+                <strong>{tool.label}</strong>
+                <small>학교망에서 막히면 FAQ의 대체 안내 확인</small>
+              </a>
+            ))}
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="split-grid">
+      <div class="content-panel">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Prompt Hub</p>
+            <h2>복사하여 바로 쓰는 프롬프트</h2>
+          </div>
+          <a class="button secondary compact" href={`${import.meta.env.BASE_URL}prompts`}>전체 보기</a>
+        </div>
+        <div class="prompt-grid prompt-grid--compact">
+          {featuredPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
+        </div>
+      </div>
+
+      <div class="content-panel">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Resources</p>
+            <h2>오늘 자료</h2>
+          </div>
+          <a class="button secondary compact" href={`${import.meta.env.BASE_URL}resources`}>자료실</a>
+        </div>
+        <div class="resource-list">
           {featuredResources.map((resource) => <ResourceCard resource={resource} />)}
         </div>
       </div>
-      <div class="section-shell">
-        <div class="section-head">
-          <div class="section-copy">
-            <div>
-              <p class="section-eyebrow">Gallery</p>
-              <h2>적용 사례</h2>
-            </div>
-          </div>
-        </div>
-        <div class="card-grid">
-          {featuredGallery.map((item) => (
-            <article class="card">
-              <h3>{item.data.title}</h3>
-              <p>{item.data.summary}</p>
-              <div class="tag-row">
-                {item.data.subjects.map((subject) => <span class="tag">{subject}</span>)}
-                {item.data.purposes.map((purpose) => <span class="tag">{purpose}</span>)}
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
     </div>
   </section>
 
   <section class="container section">
-    <div class="section-shell">
-      <div class="section-head">
-        <div class="section-copy">
-          <div>
-            <p class="section-eyebrow">Archive</p>
-            <h2>다음 회차까지 이어지는 연수 운영 흐름</h2>
-            <p>한 번의 행사 페이지가 아니라 계속 복제하고 재사용할 수 있는 구조로 설계했습니다.</p>
-          </div>
+    <div class="content-panel">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Gallery</p>
+          <h2>실제 적용 사례 미리보기</h2>
         </div>
-        <a class="button ghost" href={`${import.meta.env.BASE_URL}events`}>전체 연수 보기</a>
+        <a class="button ghost compact" href={`${import.meta.env.BASE_URL}gallery`}>사례 더 보기</a>
       </div>
-      <div class="card-grid">
-        <EventCard event={featuredEvent} />
+      <div class="gallery-grid gallery-grid--triple">
+        {featuredGallery.map((item) => <GalleryCard item={item} />)}
       </div>
     </div>
   </section>

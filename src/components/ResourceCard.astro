@@ -1,22 +1,41 @@
 ---
 import type { ResourceEntry } from "../lib/site";
+import { toUiToken } from "../lib/site";
 
 interface Props {
   resource: ResourceEntry;
 }
 
 const { resource } = Astro.props;
+const typeLabel = resource.data.type.toUpperCase();
+const iconLabel =
+  resource.data.type === "pdf" ? "PDF" :
+  resource.data.type === "hwp" ? "HWP" :
+  resource.data.type === "pptx" ? "PPT" :
+  resource.data.type === "link" ? "LINK" :
+  typeLabel;
 ---
 
-<article class="card resource-card" data-resource-card data-searchable={JSON.stringify(resource.data)}>
-  <div class="card-topline">
-    <span>{resource.data.scope === "event" ? "회차 자료" : "상시 자료"}</span>
-    <span>{resource.data.type}</span>
+<article
+  class="resource-card"
+  data-resource-card
+  data-type={toUiToken(resource.data.type)}
+  data-scope={resource.data.scope}
+  data-searchable={JSON.stringify(resource.data)}
+>
+  <div class="resource-card__icon" data-type={toUiToken(resource.data.type)}>
+    <span>{iconLabel}</span>
   </div>
-  <h3>{resource.data.title}</h3>
-  <p>{resource.data.description}</p>
-  <div class="card-meta">
-    <span>{resource.data.eventId ?? "공용 자료"}</span>
-    <a href={resource.data.url} target="_blank" rel="noreferrer">{resource.data.downloadLabel}</a>
+  <div class="resource-card__body">
+    <div class="resource-card__meta">
+      <span class="badge badge--neutral">{resource.data.scope === "event" ? "회차 자료" : "상시 자료"}</span>
+      <span class="badge badge--ghost">{typeLabel}</span>
+    </div>
+    <h3>{resource.data.title}</h3>
+    <p>{resource.data.description}</p>
+  </div>
+  <div class="resource-card__actions">
+    <small>{resource.data.eventId ?? "공용 자료"}</small>
+    <a class="button secondary compact" href={resource.data.url} target="_blank" rel="noreferrer">{resource.data.downloadLabel}</a>
   </div>
 </article>

@@ -71,6 +71,10 @@ export function formatDate(dateString: string) {
   }).format(new Date(dateString));
 }
 
+export function toUiToken(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 export const faqItems = [
   {
     question: "학교망에서 AI 도구가 열리지 않으면 어떻게 하나요?",

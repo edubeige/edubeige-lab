@@ -1,54 +1,81 @@
 ---
 import BaseLayout from "../../components/BaseLayout.astro";
+import GalleryCard from "../../components/GalleryCard.astro";
 import PageIntro from "../../components/PageIntro.astro";
 import ResourceCard from "../../components/ResourceCard.astro";
-import { getResources } from "../../lib/site";
+import { getGalleryItems, getResources } from "../../lib/site";
 
 const resources = await getResources();
+const gallery = await getGalleryItems();
 const types = [...new Set(resources.map((resource) => resource.data.type))];
 ---
 
-<BaseLayout title="자료실 | edubeige-lab" navLabel="Resources">
+<BaseLayout title="자료실 | edubeige-lab" navSection="resources">
   <PageIntro
     eyebrow="Resources"
     title="자료실"
-    description="회차 전용 자료와 상시 참고 자료를 한 번에 찾을 수 있는 다운로드 허브입니다."
-    accent="학교망 환경을 고려한 직접 링크 우선"
+    description="수업과 연수 운영에 바로 활용할 수 있는 강의 자료와 실습 파일을 다운로드 리스트 중심으로 정리했습니다."
+    accent="리스트형 다운로드 허브"
   />
 
   <section class="container section">
-    <div class="section-shell filters">
-      <div class="filter-row">
-        <input id="resource-search" type="search" placeholder="자료 제목 또는 설명 검색" />
-        <select id="resource-type">
-          <option value="">유형 전체</option>
-          {types.map((type) => <option value={type}>{type}</option>)}
-        </select>
-        <select id="resource-scope">
-          <option value="">범위 전체</option>
-          <option value="event">회차 자료</option>
-          <option value="evergreen">상시 자료</option>
-        </select>
+    <div class="content-panel content-panel--catalog">
+      <div class="search-stage">
+        <input id="resource-search" class="search-input" type="search" placeholder="자료 제목 또는 설명 검색" />
       </div>
-      <div class="card-grid" id="resource-grid">
+
+      <div class="filter-stack">
+        <div class="filter-cluster">
+          <span class="filter-label">파일 유형</span>
+          <div class="chip-group" data-filter-group="type">
+            <button class="filter-chip is-active" type="button" data-value="">전체</button>
+            {types.map((type) => <button class="filter-chip" type="button" data-value={type}>{type.toUpperCase()}</button>)}
+          </div>
+        </div>
+
+        <div class="filter-cluster">
+          <span class="filter-label">자료 범위</span>
+          <div class="chip-group" data-filter-group="scope">
+            <button class="filter-chip is-active" type="button" data-value="">전체</button>
+            <button class="filter-chip" type="button" data-value="event">회차 자료</button>
+            <button class="filter-chip" type="button" data-value="evergreen">상시 자료</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="resource-list" id="resource-grid">
         {resources.map((resource) => <ResourceCard resource={resource} />)}
       </div>
       <div id="resource-empty" class="empty-state hidden">조건에 맞는 자료가 없습니다.</div>
     </div>
   </section>
 
+  <section class="container section">
+    <div class="content-panel">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Gallery Preview</p>
+          <h2>강사 예시 갤러리</h2>
+        </div>
+        <a class="button secondary compact" href={`${import.meta.env.BASE_URL}gallery`}>전체 갤러리 보기</a>
+      </div>
+      <div class="gallery-grid gallery-grid--triple">
+        {gallery.slice(0, 3).map((item) => <GalleryCard item={item} />)}
+      </div>
+    </div>
+  </section>
+
   <script>
     const cards = Array.from(document.querySelectorAll("[data-resource-card]"));
     const searchInput = document.querySelector("#resource-search");
-    const typeSelect = document.querySelector("#resource-type");
-    const scopeSelect = document.querySelector("#resource-scope");
+    const filterGroups = Array.from(document.querySelectorAll("[data-filter-group]"));
     const emptyState = document.querySelector("#resource-empty");
+    const filterState = {
+      type: "",
+      scope: "",
+    };
 
-    if (
-      searchInput instanceof HTMLInputElement &&
-      typeSelect instanceof HTMLSelectElement &&
-      scopeSelect instanceof HTMLSelectElement
-    ) {
+    if (searchInput instanceof HTMLInputElement) {
       const dataset = cards.map((card) => {
         const payload = JSON.parse(card.getAttribute("data-searchable") ?? "{}");
         return { element: card, ...payload };
@@ -61,8 +88,8 @@ const types = [...new Set(resources.map((resource) => resource.data.type))];
         dataset.forEach((item) => {
           const haystack = `${item.title} ${item.description}`.toLowerCase();
           const matchesQuery = !query || haystack.includes(query);
-          const matchesType = !typeSelect.value || item.type === typeSelect.value;
-          const matchesScope = !scopeSelect.value || item.scope === scopeSelect.value;
+          const matchesType = !filterState.type || item.type === filterState.type;
+          const matchesScope = !filterState.scope || item.scope === filterState.scope;
           const visible = matchesQuery && matchesType && matchesScope;
           item.element.classList.toggle("hidden", !visible);
           if (visible) visibleCount += 1;
@@ -73,7 +100,23 @@ const types = [...new Set(resources.map((resource) => resource.data.type))];
         }
       };
 
-      [searchInput, typeSelect, scopeSelect].forEach((control) => control.addEventListener("input", render));
+      filterGroups.forEach((group) => {
+        group.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLButtonElement)) return;
+          const groupName = group.getAttribute("data-filter-group");
+          if (!groupName) return;
+          const nextValue = target.dataset.value ?? "";
+          if (groupName === "type") filterState.type = nextValue;
+          if (groupName === "scope") filterState.scope = nextValue;
+          Array.from(group.querySelectorAll("button")).forEach((button) => {
+            button.classList.toggle("is-active", button === target);
+          });
+          render();
+        });
+      });
+
+      searchInput.addEventListener("input", render);
       render();
     }
   </script>
