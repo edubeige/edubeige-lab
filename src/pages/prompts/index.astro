@@ -1,0 +1,113 @@
+---
+import BaseLayout from "../../components/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import PromptCard from "../../components/PromptCard.astro";
+import { getPrompts } from "../../lib/site";
+
+const prompts = await getPrompts();
+const tools = [...new Set(prompts.map((prompt) => prompt.data.tool))];
+const subjects = [...new Set(prompts.flatMap((prompt) => prompt.data.subjects))];
+const purposes = [...new Set(prompts.flatMap((prompt) => prompt.data.purposes))];
+const trainingTypes = [...new Set(prompts.flatMap((prompt) => prompt.data.trainingTypes))];
+---
+
+<BaseLayout title="프롬프트 허브 | edubeige-lab" navLabel="Prompts">
+  <PageIntro
+    eyebrow="Prompt Hub"
+    title="프롬프트 허브"
+    description="도구, 교과, 활용 목적, 연수 유형별로 필터링하면서 바로 복사해 사용할 수 있는 실습용 프롬프트 모음입니다."
+    accent="Fuse.js 기반 클라이언트 검색"
+  />
+
+  <section class="container section">
+    <div class="section-shell filters">
+      <div class="section-copy">
+        <div>
+          <p class="section-eyebrow">Search & Filter</p>
+          <h2>원하는 프롬프트를 빠르게 찾기</h2>
+        </div>
+      </div>
+      <div class="filter-row">
+        <input id="prompt-search" type="search" placeholder="제목, 요약, 본문으로 검색" />
+        <select id="prompt-tool">
+          <option value="">도구 전체</option>
+          {tools.map((tool) => <option value={tool}>{tool}</option>)}
+        </select>
+        <select id="prompt-subject">
+          <option value="">교과 전체</option>
+          {subjects.map((subject) => <option value={subject}>{subject}</option>)}
+        </select>
+        <select id="prompt-purpose">
+          <option value="">활용 목적 전체</option>
+          {purposes.map((purpose) => <option value={purpose}>{purpose}</option>)}
+        </select>
+        <select id="prompt-training">
+          <option value="">연수 유형 전체</option>
+          {trainingTypes.map((item) => <option value={item}>{item}</option>)}
+        </select>
+      </div>
+      <div class="card-grid" id="prompt-grid">
+        {prompts.map((prompt) => <PromptCard prompt={prompt} />)}
+      </div>
+      <div id="prompt-empty" class="empty-state hidden">조건에 맞는 프롬프트가 없습니다. 필터를 조금 넓혀 보세요.</div>
+    </div>
+  </section>
+
+  <script>
+    import Fuse from "fuse.js";
+
+    const cards = Array.from(document.querySelectorAll("[data-prompt-card]"));
+    const searchInput = document.querySelector("#prompt-search");
+    const toolSelect = document.querySelector("#prompt-tool");
+    const subjectSelect = document.querySelector("#prompt-subject");
+    const purposeSelect = document.querySelector("#prompt-purpose");
+    const trainingSelect = document.querySelector("#prompt-training");
+    const emptyState = document.querySelector("#prompt-empty");
+
+    if (
+      searchInput instanceof HTMLInputElement &&
+      toolSelect instanceof HTMLSelectElement &&
+      subjectSelect instanceof HTMLSelectElement &&
+      purposeSelect instanceof HTMLSelectElement &&
+      trainingSelect instanceof HTMLSelectElement
+    ) {
+      const dataset = cards.map((card) => {
+        const payload = JSON.parse(card.getAttribute("data-searchable") ?? "{}");
+        return { element: card, ...payload };
+      });
+
+      const fuse = new Fuse(dataset, {
+        keys: ["title", "summary", "body", "tool", "subjects", "purposes", "trainingTypes"],
+        threshold: 0.32,
+      });
+
+      const render = () => {
+        const query = searchInput.value.trim();
+        const searchMatched = query ? new Set(fuse.search(query).map((entry) => entry.item.element)) : null;
+
+        let visibleCount = 0;
+
+        dataset.forEach((item) => {
+          const matchesQuery = !searchMatched || searchMatched.has(item.element);
+          const matchesTool = !toolSelect.value || item.tool === toolSelect.value;
+          const matchesSubject = !subjectSelect.value || item.subjects.includes(subjectSelect.value);
+          const matchesPurpose = !purposeSelect.value || item.purposes.includes(purposeSelect.value);
+          const matchesTraining = !trainingSelect.value || item.trainingTypes.includes(trainingSelect.value);
+          const visible = matchesQuery && matchesTool && matchesSubject && matchesPurpose && matchesTraining;
+          item.element.classList.toggle("hidden", !visible);
+          if (visible) visibleCount += 1;
+        });
+
+        if (emptyState instanceof HTMLElement) {
+          emptyState.classList.toggle("hidden", visibleCount !== 0);
+        }
+      };
+
+      [searchInput, toolSelect, subjectSelect, purposeSelect, trainingSelect].forEach((control) =>
+        control.addEventListener("input", render),
+      );
+
+      render();
+    }
+  </script>
+</BaseLayout>

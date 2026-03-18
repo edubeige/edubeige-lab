@@ -1,0 +1,10 @@
+{
+  "id": "resource-checklist",
+  "title": "연수 전 준비 체크리스트",
+  "type": "link",
+  "scope": "event",
+  "eventId": "event-2026-03-15",
+  "description": "계정, 브라우저, 공유 링크 준비 여부를 점검하는 안내 자료",
+  "url": "/edubeige-lab/files/teacher-checklist.txt",
+  "downloadLabel": "다운로드"
+}

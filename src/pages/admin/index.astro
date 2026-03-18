@@ -1,0 +1,398 @@
+---
+import BaseLayout from "../../components/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import {
+  adminSections,
+  getEvents,
+  getGalleryItems,
+  getModules,
+  getPrompts,
+  getResources,
+  getSiteConfig,
+} from "../../lib/site";
+
+const site = await getSiteConfig();
+const events = await getEvents();
+const modules = await getModules();
+const prompts = await getPrompts();
+const resources = await getResources();
+const gallery = await getGalleryItems();
+
+if (!site) {
+  throw new Error("site config is missing");
+}
+
+const state = {
+  site: site.data,
+  events: events.map((entry) => entry.data),
+  modules: modules.map((entry) => entry.data),
+  prompts: prompts.map((entry) => ({ ...entry.data, body: entry.body.trim() })),
+  resources: resources.map((entry) => entry.data),
+  gallery: gallery.map((entry) => entry.data),
+};
+---
+
+<BaseLayout title="/admin | edubeige-lab" navLabel="Admin">
+  <PageIntro
+    eyebrow="Admin MVP"
+    title="브라우저 로컬 수정 + export/import 작업대"
+    description="로그인 없이 콘텐츠를 한 화면에서 다듬고, 로컬 draft를 유지한 뒤 JSON으로 export하는 관리자 MVP입니다."
+    accent="GitHub 저장은 Phase 2"
+  />
+
+  <section class="container section">
+    <div class="admin-shell">
+      <div class="admin-toolbar">
+        <button id="admin-save" class="secondary" type="button">draft 저장</button>
+        <button id="admin-export" type="button">JSON 내보내기</button>
+        <button id="admin-reset" class="ghost" type="button">초기값으로 되돌리기</button>
+        <label class="button secondary" for="admin-import">JSON 가져오기</label>
+        <input id="admin-import" type="file" accept="application/json" class="hidden" />
+        <span id="admin-status" class="status-badge">초기 상태</span>
+      </div>
+
+      <div class="admin-grid" style="margin-top: 1.2rem;">
+        <div class="admin-panels">
+          <div class="admin-panel">
+            <h3>섹션 점프</h3>
+            <div class="tag-row">
+              {adminSections.map((section) => <a class="tag" href={`#admin-${section.id}`}>{section.label}</a>)}
+            </div>
+          </div>
+
+          <div class="admin-panel" id="admin-site-panel">
+            <h3 id="admin-site">사이트 설정</h3>
+            <div id="admin-site-fields"></div>
+          </div>
+
+          <div class="admin-panel" id="admin-events-panel">
+            <h3 id="admin-events">회차</h3>
+            <div id="admin-events-fields"></div>
+          </div>
+
+          <div class="admin-panel" id="admin-modules-panel">
+            <h3 id="admin-modules">모듈</h3>
+            <div id="admin-modules-fields"></div>
+          </div>
+
+          <div class="admin-panel" id="admin-prompts-panel">
+            <h3 id="admin-prompts">프롬프트</h3>
+            <div id="admin-prompts-fields"></div>
+          </div>
+
+          <div class="admin-panel" id="admin-resources-panel">
+            <h3 id="admin-resources">자료</h3>
+            <div id="admin-resources-fields"></div>
+          </div>
+
+          <div class="admin-panel" id="admin-gallery-panel">
+            <h3 id="admin-gallery">갤러리</h3>
+            <div id="admin-gallery-fields"></div>
+          </div>
+        </div>
+
+        <aside class="admin-note">
+          <span class="status-badge">MVP 운영 원칙</span>
+          <h3>이 화면은 GitHub Pages에서도 동작하는 작업용 편집기입니다.</h3>
+          <p>수정 내용은 브라우저 로컬 draft로 자동 저장되며, 최종 반영은 JSON export 후 저장소 커밋으로 이어집니다.</p>
+          <ul>
+            <li>외부 서비스 embed 대신 직접 링크를 유지합니다.</li>
+            <li>프롬프트에는 개인정보를 입력하지 않도록 안내 문구를 둡니다.</li>
+            <li>모듈 정렬은 up/down 방식으로 처리합니다.</li>
+            <li>GitHub 직접 저장은 Phase 2로 미룹니다.</li>
+          </ul>
+          <p style="margin-top: 1rem;">
+            미리보기:
+            <a href={`${import.meta.env.BASE_URL}`} style="text-decoration: underline;">홈</a>,
+            <a href={`${import.meta.env.BASE_URL}events`} style="text-decoration: underline;">연수 일정</a>
+          </p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline type="application/json" id="admin-initial-state" set:html={JSON.stringify(state)}></script>
+  <script>
+    // @ts-nocheck
+    const storageKey = "edubeige-lab-admin-draft";
+    const raw = document.querySelector("#admin-initial-state")?.textContent ?? "{}";
+    const initialState = JSON.parse(raw);
+    let state = structuredClone(initialState);
+
+    const statusNode = document.querySelector("#admin-status");
+    const siteFields = document.querySelector("#admin-site-fields");
+    const eventFields = document.querySelector("#admin-events-fields");
+    const moduleFields = document.querySelector("#admin-modules-fields");
+    const promptFields = document.querySelector("#admin-prompts-fields");
+    const resourceFields = document.querySelector("#admin-resources-fields");
+    const galleryFields = document.querySelector("#admin-gallery-fields");
+    const importInput = document.querySelector("#admin-import");
+
+    const setStatus = (message) => {
+      if (statusNode instanceof HTMLElement) statusNode.textContent = message;
+    };
+
+    const saveDraft = () => {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      setStatus("draft 저장됨");
+    };
+
+    const scheduleDraftSave = (() => {
+      let timeout;
+      return () => {
+        clearTimeout(timeout);
+        timeout = window.setTimeout(saveDraft, 240);
+      };
+    })();
+
+    const createField = (label, value, onChange, multiline = false) => {
+      const wrapper = document.createElement("label");
+      wrapper.className = "admin-list-item";
+      const title = document.createElement("strong");
+      title.textContent = label;
+      const input = multiline ? document.createElement("textarea") : document.createElement("input");
+      input.value = value ?? "";
+      input.addEventListener("input", (event) => {
+        const target = event.currentTarget;
+        if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement)) return;
+        onChange(target.value);
+        scheduleDraftSave();
+      });
+      wrapper.append(title, input);
+      return wrapper;
+    };
+
+    const createArrayField = (label, values, onChange) =>
+      createField(label, values.join("\n"), (value) => {
+        onChange(
+          value
+            .split("\n")
+            .map((item) => item.trim())
+            .filter(Boolean),
+        );
+      }, true);
+
+    const renderSite = () => {
+      if (!(siteFields instanceof HTMLElement)) return;
+      siteFields.innerHTML = "";
+      const list = document.createElement("div");
+      list.className = "admin-list";
+      list.append(
+        createField("사이트 제목", state.site.siteTitle, (value) => { state.site.siteTitle = value; }),
+        createField("사이트 부제", state.site.siteSubtitle, (value) => { state.site.siteSubtitle = value; }, true),
+        createField("base path", state.site.siteBasePath, (value) => { state.site.siteBasePath = value; }),
+        createField("대표 회차 slug", state.site.featuredEventSlug, (value) => { state.site.featuredEventSlug = value; }),
+      );
+      siteFields.append(list);
+    };
+
+    const renderEvents = () => {
+      if (!(eventFields instanceof HTMLElement)) return;
+      eventFields.innerHTML = "";
+      const list = document.createElement("div");
+      list.className = "admin-list";
+      state.events.forEach((event, index) => {
+        const box = document.createElement("div");
+        box.className = "admin-list-item";
+        box.append(
+          createField(`회차 ${index + 1} 제목`, event.title, (value) => { event.title = value; }),
+          createField("slug", event.slug, (value) => { event.slug = value; }),
+          createField("날짜", event.date, (value) => { event.date = value; }),
+          createField("장소", event.venue, (value) => { event.venue = value; }),
+          createField("강사", event.speaker, (value) => { event.speaker = value; }),
+          createField("소개", event.heroSummary, (value) => { event.heroSummary = value; }, true),
+          createArrayField("공지", event.notices, (value) => { event.notices = value; }),
+        );
+        list.append(box);
+      });
+      eventFields.append(list);
+    };
+
+    const swapModules = (moduleId, direction) => {
+      const current = state.modules.findIndex((item) => item.id === moduleId);
+      const next = current + direction;
+      if (current < 0 || next < 0 || next >= state.modules.length) return;
+      const eventId = state.modules[current].eventId;
+      if (state.modules[next].eventId !== eventId) return;
+      [state.modules[current], state.modules[next]] = [state.modules[next], state.modules[current]];
+      const eventModules = state.modules.filter((item) => item.eventId === eventId).sort((a, b) => a.order - b.order);
+      eventModules.forEach((item, index) => {
+        item.order = index + 1;
+      });
+      renderModules();
+      scheduleDraftSave();
+      setStatus("모듈 순서 변경됨");
+    };
+
+    const renderModules = () => {
+      if (!(moduleFields instanceof HTMLElement)) return;
+      moduleFields.innerHTML = "";
+      const list = document.createElement("div");
+      list.className = "admin-list";
+      const grouped = state.events.map((event) => ({
+        event,
+        modules: state.modules
+          .filter((item) => item.eventId === event.id)
+          .sort((a, b) => a.order - b.order),
+      }));
+
+      grouped.forEach(({ event, modules }) => {
+        const group = document.createElement("div");
+        group.className = "admin-list-item";
+        const heading = document.createElement("strong");
+        heading.textContent = `${event.title} (${modules.length}개 모듈)`;
+        group.append(heading);
+
+        modules.forEach((module, index) => {
+          const box = document.createElement("div");
+          box.className = "admin-list-item";
+          const row = document.createElement("div");
+          row.className = "button-row";
+          const up = document.createElement("button");
+          up.type = "button";
+          up.className = "ghost";
+          up.textContent = "위로";
+          up.disabled = index === 0;
+          up.addEventListener("click", () => swapModules(module.id, -1));
+          const down = document.createElement("button");
+          down.type = "button";
+          down.className = "ghost";
+          down.textContent = "아래로";
+          down.disabled = index === modules.length - 1;
+          down.addEventListener("click", () => swapModules(module.id, 1));
+          row.append(up, down);
+
+          box.append(
+            createField("모듈 제목", module.title, (value) => { module.title = value; }),
+            createField("시간", `${module.startTime} - ${module.endTime}`, (value) => {
+              const [start = module.startTime, end = module.endTime] = value.split("-").map((item) => item.trim());
+              module.startTime = start;
+              module.endTime = end;
+            }),
+            createField("요약", module.summary, (value) => { module.summary = value; }, true),
+            createArrayField("체크리스트", module.checklist, (value) => { module.checklist = value; }),
+            row,
+          );
+          group.append(box);
+        });
+
+        list.append(group);
+      });
+
+      moduleFields.append(list);
+    };
+
+    const renderPrompts = () => {
+      if (!(promptFields instanceof HTMLElement)) return;
+      promptFields.innerHTML = "";
+      const list = document.createElement("div");
+      list.className = "admin-list";
+      state.prompts.forEach((prompt) => {
+        const box = document.createElement("div");
+        box.className = "admin-list-item";
+        box.append(
+          createField("프롬프트 제목", prompt.title, (value) => { prompt.title = value; }),
+          createField("도구", prompt.tool, (value) => { prompt.tool = value; }),
+          createField("요약", prompt.summary, (value) => { prompt.summary = value; }, true),
+          createField("템플릿", prompt.template, (value) => { prompt.template = value; }, true),
+          createField("비고", prompt.notes, (value) => { prompt.notes = value; }, true),
+        );
+        list.append(box);
+      });
+      promptFields.append(list);
+    };
+
+    const renderResources = () => {
+      if (!(resourceFields instanceof HTMLElement)) return;
+      resourceFields.innerHTML = "";
+      const list = document.createElement("div");
+      list.className = "admin-list";
+      state.resources.forEach((resource) => {
+        const box = document.createElement("div");
+        box.className = "admin-list-item";
+        box.append(
+          createField("자료 제목", resource.title, (value) => { resource.title = value; }),
+          createField("유형", resource.type, (value) => { resource.type = value; }),
+          createField("설명", resource.description, (value) => { resource.description = value; }, true),
+          createField("URL", resource.url, (value) => { resource.url = value; }),
+        );
+        list.append(box);
+      });
+      resourceFields.append(list);
+    };
+
+    const renderGallery = () => {
+      if (!(galleryFields instanceof HTMLElement)) return;
+      galleryFields.innerHTML = "";
+      const list = document.createElement("div");
+      list.className = "admin-list";
+      state.gallery.forEach((item) => {
+        const box = document.createElement("div");
+        box.className = "admin-list-item";
+        box.append(
+          createField("사례 제목", item.title, (value) => { item.title = value; }),
+          createField("도구", item.tool, (value) => { item.tool = value; }),
+          createField("요약", item.summary, (value) => { item.summary = value; }, true),
+          createField("상세 설명", item.detail, (value) => { item.detail = value; }, true),
+        );
+        list.append(box);
+      });
+      galleryFields.append(list);
+    };
+
+    const renderAll = () => {
+      renderSite();
+      renderEvents();
+      renderModules();
+      renderPrompts();
+      renderResources();
+      renderGallery();
+    };
+
+    const draft = localStorage.getItem(storageKey);
+    if (draft) {
+      try {
+        state = JSON.parse(draft);
+        setStatus("저장된 draft 불러옴");
+      } catch {
+        setStatus("draft를 읽지 못해 초기값 사용");
+      }
+    }
+
+    renderAll();
+
+    document.querySelector("#admin-save")?.addEventListener("click", saveDraft);
+    document.querySelector("#admin-reset")?.addEventListener("click", () => {
+      state = structuredClone(initialState);
+      localStorage.removeItem(storageKey);
+      renderAll();
+      setStatus("초기값으로 되돌림");
+    });
+    document.querySelector("#admin-export")?.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "edubeige-lab-content.json";
+      link.click();
+      URL.revokeObjectURL(url);
+      setStatus("JSON export 완료");
+    });
+
+    if (importInput instanceof HTMLInputElement) {
+      importInput.addEventListener("change", async () => {
+        const file = importInput.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          state = JSON.parse(text);
+          renderAll();
+          scheduleDraftSave();
+          setStatus("JSON import 완료");
+        } catch {
+          setStatus("JSON import 실패");
+        }
+      });
+    }
+  </script>
+</BaseLayout>

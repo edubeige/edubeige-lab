@@ -1,0 +1,44 @@
+{
+  "id": "module-4",
+  "slug": "vibe-coding-camp-kickoff",
+  "eventId": "event-2026-04-12",
+  "order": 1,
+  "title": "웹페이지 기획부터 공개까지 빠르게 훑기",
+  "summary": "프로젝트 사이트 구조와 GitHub Pages 공개 흐름 익히기",
+  "learningGoals": [
+    "프로젝트 사이트 base path 개념을 이해한다.",
+    "정적 사이트 구조를 설계하고 배포 흐름을 설명할 수 있다."
+  ],
+  "startTime": "13:00",
+  "endTime": "14:20",
+  "tags": [
+    "GitHub Pages",
+    "배포 실습"
+  ],
+  "checklist": [
+    "GitHub 계정 로그인 확인",
+    "브라우저 파일 다운로드 허용"
+  ],
+  "steps": [
+    {
+      "title": "저장소 구조 확인",
+      "body": "public, src, content의 역할을 나눠 본다."
+    },
+    {
+      "title": "사이트 공개 흐름 점검",
+      "body": "build 후 GitHub Pages에 올라가는 경로를 확인한다."
+    }
+  ],
+  "promptIds": [
+    "prompt-vibe-coding-landing"
+  ],
+  "resourceIds": [
+    "resource-vibe-kit"
+  ],
+  "shareLinks": [
+    {
+      "label": "참고 저장소",
+      "url": "https://github.com/"
+    }
+  ]
+}

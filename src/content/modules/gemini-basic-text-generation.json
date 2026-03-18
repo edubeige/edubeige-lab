@@ -1,0 +1,49 @@
+{
+  "id": "module-1",
+  "slug": "gemini-basic-text-generation",
+  "eventId": "event-2026-03-15",
+  "order": 1,
+  "title": "Gemini 기초와 텍스트 생성",
+  "summary": "생성형 AI 원리 이해와 기본 인터페이스 익히기",
+  "learningGoals": [
+    "생성형 AI의 기본 동작 원리를 설명할 수 있다.",
+    "간단한 수업용 요청 문장을 직접 작성할 수 있다."
+  ],
+  "startTime": "09:00",
+  "endTime": "09:50",
+  "tags": [
+    "실습 위주",
+    "계정 필수"
+  ],
+  "checklist": [
+    "구글 계정 로그인 여부 확인",
+    "브라우저 팝업 차단 해제"
+  ],
+  "steps": [
+    {
+      "title": "기본 역할 부여",
+      "body": "AI에게 교사 역할과 대상 학년을 지정한다."
+    },
+    {
+      "title": "초안 생성",
+      "body": "수업 주제와 활동 목표를 입력해 초안을 생성한다."
+    },
+    {
+      "title": "수정 요청",
+      "body": "난이도, 시간, 평가 요소를 추가 요청한다."
+    }
+  ],
+  "promptIds": [
+    "prompt-feedback-science",
+    "prompt-lesson-starter"
+  ],
+  "resourceIds": [
+    "resource-slides"
+  ],
+  "shareLinks": [
+    {
+      "label": "결과 공유 보드",
+      "url": "https://example.com/padlet"
+    }
+  ]
+}

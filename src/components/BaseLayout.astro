@@ -1,0 +1,91 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  navLabel?: string;
+}
+
+const {
+  title,
+  description = "교원 연수 운영을 위한 실습형 콘텐츠 허브",
+  navLabel = "홈",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="container header-inner">
+          <a class="brand" href={`${import.meta.env.BASE_URL}`}>
+            <span class="brand-mark">EB</span>
+            <span>
+              <strong>edubeige-lab</strong>
+              <small>{navLabel}</small>
+            </span>
+          </a>
+          <nav class="site-nav" aria-label="주요 메뉴">
+            <a href={`${import.meta.env.BASE_URL}`}>홈</a>
+            <a href={`${import.meta.env.BASE_URL}events`}>연수 일정</a>
+            <a href={`${import.meta.env.BASE_URL}prompts`}>프롬프트</a>
+            <a href={`${import.meta.env.BASE_URL}resources`}>자료실</a>
+            <a href={`${import.meta.env.BASE_URL}gallery`}>사례</a>
+            <a href={`${import.meta.env.BASE_URL}faq`}>FAQ</a>
+            <a href={`${import.meta.env.BASE_URL}admin`}>관리자</a>
+          </nav>
+        </div>
+      </header>
+      <main class="page-main">
+        <slot />
+      </main>
+      <footer class="site-footer">
+        <div class="container footer-inner">
+          <div>
+            <strong>edubeige-lab</strong>
+            <p>GitHub Pages에 배포하는 교원 연수 운영 허브 MVP</p>
+          </div>
+          <div class="footer-links">
+            <a href={`${import.meta.env.BASE_URL}events`}>연수 일정</a>
+            <a href={`${import.meta.env.BASE_URL}resources`}>자료실</a>
+            <a href={`${import.meta.env.BASE_URL}admin`}>/admin</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <script>
+      document.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const button = target.closest("[data-copy]");
+        if (!(button instanceof HTMLButtonElement)) return;
+
+        const text = button.dataset.copy ?? "";
+        if (!text) return;
+
+        const originalLabel = button.textContent ?? "복사";
+
+        try {
+          await navigator.clipboard.writeText(text);
+          button.textContent = "복사 완료";
+        } catch {
+          window.prompt("복사해서 사용하세요", text);
+          button.textContent = "복사 안내";
+        }
+
+        window.setTimeout(() => {
+          button.textContent = originalLabel;
+        }, 1800);
+      });
+    </script>
+  </body>
+</html>

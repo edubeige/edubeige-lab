@@ -1,0 +1,41 @@
+{
+  "id": "event-2026-04-12",
+  "slug": "2026-04-vibe-coding-bootcamp",
+  "title": "바이브 코딩 부트캠프: 교육용 웹페이지 빠르게 만들기",
+  "date": "2026-04-12",
+  "venue": "원격 연수 + 실시간 실습실",
+  "speaker": "에듀베이지랩 운영팀",
+  "heroSummary": "교실 프로젝트를 웹으로 엮는 실전 제작형 워크숍",
+  "quickLinks": [
+    {
+      "label": "실습 링크 모음",
+      "url": "/resources"
+    },
+    {
+      "label": "연수 FAQ",
+      "url": "/faq"
+    }
+  ],
+  "notices": [
+    "원격 연수 참여 시 크롬 최신 버전을 권장합니다."
+  ],
+  "toolLinks": [
+    {
+      "label": "GitHub",
+      "url": "https://github.com/"
+    },
+    {
+      "label": "CodePen",
+      "url": "https://codepen.io/"
+    }
+  ],
+  "scheduleItems": [
+    "module-4"
+  ],
+  "resourceIds": [
+    "resource-vibe-kit"
+  ],
+  "galleryIds": [
+    "gallery-class-homepage"
+  ]
+}

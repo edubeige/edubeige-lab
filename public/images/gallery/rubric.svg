@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+  <title id="title">AI 기반 수행평가 루브릭</title>
+  <desc id="desc">노란 포인트와 표 형식 카드가 있는 썸네일</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff6d1" />
+      <stop offset="100%" stop-color="#f3f7ff" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="750" fill="url(#bg)" rx="48" />
+  <rect x="80" y="90" width="1040" height="570" rx="40" fill="#ffffff" opacity="0.96" />
+  <rect x="130" y="145" width="260" height="28" rx="14" fill="#dbe6ff" />
+  <rect x="130" y="205" width="940" height="82" rx="24" fill="#f8fbff" stroke="#d9e4f5" />
+  <rect x="130" y="317" width="940" height="82" rx="24" fill="#f8fbff" stroke="#d9e4f5" />
+  <rect x="130" y="429" width="940" height="82" rx="24" fill="#f8fbff" stroke="#d9e4f5" />
+  <rect x="810" y="545" width="180" height="56" rx="28" fill="#1c58f2" />
+  <circle cx="1010" cy="170" r="70" fill="#ffd66b" opacity="0.55" />
+  <text x="130" y="620" fill="#13203b" font-family="Pretendard, Noto Sans KR, sans-serif" font-size="56" font-weight="700">AI 기반 수행평가 루브릭</text>
+  <text x="130" y="676" fill="#53627d" font-family="Pretendard, Noto Sans KR, sans-serif" font-size="30">공통 · 평가 설계 · ChatGPT</text>
+</svg>

@@ -1,0 +1,7 @@
+바이브 코딩 실습 링크 모음
+
+- GitHub Pages 구조: 저장소명과 base path를 함께 확인
+- public 폴더: 정적 파일 위치
+- src/content: JSON과 Markdown 콘텐츠 위치
+- /admin: 로컬 draft 및 export/import 작업대
+- 배포 방식: GitHub Actions -> GitHub Pages

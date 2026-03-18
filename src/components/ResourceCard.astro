@@ -1,0 +1,22 @@
+---
+import type { ResourceEntry } from "../lib/site";
+
+interface Props {
+  resource: ResourceEntry;
+}
+
+const { resource } = Astro.props;
+---
+
+<article class="card resource-card" data-resource-card data-searchable={JSON.stringify(resource.data)}>
+  <div class="card-topline">
+    <span>{resource.data.scope === "event" ? "회차 자료" : "상시 자료"}</span>
+    <span>{resource.data.type}</span>
+  </div>
+  <h3>{resource.data.title}</h3>
+  <p>{resource.data.description}</p>
+  <div class="card-meta">
+    <span>{resource.data.eventId ?? "공용 자료"}</span>
+    <a href={resource.data.url} target="_blank" rel="noreferrer">{resource.data.downloadLabel}</a>
+  </div>
+</article>

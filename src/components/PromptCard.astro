@@ -1,0 +1,40 @@
+---
+import type { PromptEntry } from "../lib/site";
+
+interface Props {
+  prompt: PromptEntry;
+}
+
+const { prompt } = Astro.props;
+const bodyText = prompt.body.trim();
+const tags = [...prompt.data.subjects, ...prompt.data.purposes, prompt.data.tool];
+---
+
+<article class="card prompt-card" data-prompt-card data-searchable={JSON.stringify({
+  title: prompt.data.title,
+  summary: prompt.data.summary,
+  tool: prompt.data.tool,
+  subjects: prompt.data.subjects,
+  purposes: prompt.data.purposes,
+  trainingTypes: prompt.data.trainingTypes,
+  difficulty: prompt.data.difficulty,
+  body: bodyText,
+})}>
+  <div class="card-topline">
+    <span>{prompt.data.tool}</span>
+    <span>{prompt.data.difficulty}</span>
+  </div>
+  <h3>{prompt.data.title}</h3>
+  <p>{prompt.data.summary}</p>
+  <div class="tag-row">
+    {tags.map((tag) => <span class="tag">{tag}</span>)}
+  </div>
+  <div class="prompt-body">
+    <h4>템플릿</h4>
+    <p>{prompt.data.template}</p>
+  </div>
+  <div class="prompt-meta">
+    <button class="button secondary" type="button" data-copy={prompt.data.template}>복사</button>
+    <span>{prompt.data.notes}</span>
+  </div>
+</article>

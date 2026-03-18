@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+  <title id="title">학급 안내 웹페이지 시안</title>
+  <desc id="desc">웹 레이아웃과 버튼이 표현된 썸네일</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f1630" />
+      <stop offset="100%" stop-color="#274eb2" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="750" fill="url(#bg)" rx="48" />
+  <rect x="98" y="88" width="1000" height="574" rx="36" fill="#ffffff" opacity="0.95" />
+  <rect x="150" y="140" width="360" height="170" rx="34" fill="#1c58f2" />
+  <rect x="550" y="140" width="500" height="74" rx="28" fill="#f5f8ff" />
+  <rect x="550" y="236" width="500" height="74" rx="28" fill="#f5f8ff" />
+  <rect x="150" y="348" width="250" height="220" rx="28" fill="#f5f8ff" />
+  <rect x="430" y="348" width="250" height="220" rx="28" fill="#f5f8ff" />
+  <rect x="710" y="348" width="340" height="220" rx="28" fill="#fff6cf" />
+  <circle cx="1015" cy="118" r="28" fill="#ffd66b" />
+  <text x="150" y="640" fill="#ffffff" font-family="Pretendard, Noto Sans KR, sans-serif" font-size="56" font-weight="700">학급 안내 웹페이지 시안</text>
+  <text x="150" y="695" fill="#dfe8ff" font-family="Pretendard, Noto Sans KR, sans-serif" font-size="30">정보 · 웹 기획 · Gemini</text>
+</svg>

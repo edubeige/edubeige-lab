@@ -1,0 +1,147 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../components/BaseLayout.astro";
+import PromptCard from "../../components/PromptCard.astro";
+import ResourceCard from "../../components/ResourceCard.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import { byIds, getEvents, getPrompts, getResources } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const modules = await getCollection("modules");
+  return modules.map((module) => ({
+    params: { slug: module.data.slug },
+    props: { module },
+  }));
+}
+
+const { module } = Astro.props;
+const events = await getEvents();
+const prompts = await getPrompts();
+const resources = await getResources();
+const event = events.find((item) => item.data.id === module.data.eventId);
+const relatedPrompts = byIds(prompts, module.data.promptIds);
+const relatedResources = byIds(resources, module.data.resourceIds);
+---
+
+<BaseLayout title={`${module.data.title} | edubeige-lab`} navLabel="Module">
+  <PageIntro
+    eyebrow="Module Detail"
+    title={module.data.title}
+    description={module.data.summary}
+    accent={`${module.data.startTime} - ${module.data.endTime}`}
+  />
+
+  <section class="container section">
+    <div class="hero-panel">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="section-eyebrow">Learning Goals</p>
+          <h1>{module.data.title}</h1>
+          <p>{module.data.summary}</p>
+          <div class="tag-row" style="margin-top: 1rem;">
+            {module.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+          <div class="hero-actions" style="margin-top: 1.5rem;">
+            {event && <a class="button secondary" href={`${import.meta.env.BASE_URL}events/${event.data.slug}`}>회차로 돌아가기</a>}
+            <a class="button" href={`${import.meta.env.BASE_URL}faq`}>문제 해결 보기</a>
+          </div>
+        </div>
+        <aside class="hero-aside">
+          <div class="section-shell">
+            <div class="section-copy">
+              <div>
+                <p class="section-eyebrow">목표</p>
+                <h2>이 모듈에서 얻는 것</h2>
+              </div>
+            </div>
+            <div class="check-list">
+              {module.data.learningGoals.map((goal) => <div class="check-item">{goal}</div>)}
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="two-column">
+      <div class="section-shell">
+        <div class="section-copy">
+          <div>
+            <p class="section-eyebrow">Checklist</p>
+            <h2>준비 체크리스트</h2>
+          </div>
+        </div>
+        <div class="check-list">
+          {module.data.checklist.map((item) => <div class="check-item">{item}</div>)}
+        </div>
+      </div>
+      <div class="section-shell">
+        <div class="section-copy">
+          <div>
+            <p class="section-eyebrow">Share</p>
+            <h2>결과 공유</h2>
+          </div>
+        </div>
+        <div class="link-grid">
+          {module.data.shareLinks.map((link) => (
+            <a class="tool-link" href={link.url} target="_blank" rel="noreferrer">
+              <strong>{link.label}</strong>
+              <span class="muted">대체 링크는 FAQ에서 안내</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="section-shell">
+      <div class="section-copy">
+        <div>
+          <p class="section-eyebrow">Step by Step</p>
+          <h2>단계별 실습 가이드</h2>
+        </div>
+      </div>
+      <div class="step-list">
+        {module.data.steps.map((step, index) => (
+          <div class="step-item">
+            <strong>{index + 1}. {step.title}</strong>
+            <p>{step.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="two-column">
+      <div class="section-shell">
+        <div class="section-head">
+          <div class="section-copy">
+            <div>
+              <p class="section-eyebrow">Prompts</p>
+              <h2>관련 프롬프트 카드</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-grid">
+          {relatedPrompts.map((prompt) => <PromptCard prompt={prompt} />)}
+        </div>
+      </div>
+      <div class="section-shell">
+        <div class="section-head">
+          <div class="section-copy">
+            <div>
+              <p class="section-eyebrow">Resources</p>
+              <h2>함께 보는 자료</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-grid">
+          {relatedResources.map((resource) => <ResourceCard resource={resource} />)}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

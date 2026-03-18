@@ -1,0 +1,26 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  description: string;
+  accent?: string;
+}
+
+const { eyebrow, title, description, accent = "기준 운영 문서에서 출발한 구현 MVP" } = Astro.props;
+---
+
+<section class="page-intro container">
+  <div class="intro-card">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <div class="intro-grid">
+      <div>
+        <h1>{title}</h1>
+        <p>{description}</p>
+      </div>
+      <aside class="intro-note">
+        <span>Focus</span>
+        <strong>{accent}</strong>
+      </aside>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,14 @@
+{
+  "id": "gallery-class-homepage",
+  "title": "학급 안내 웹페이지 시안",
+  "tool": "Gemini",
+  "subjects": [
+    "정보"
+  ],
+  "purposes": [
+    "웹 기획"
+  ],
+  "thumbnail": "/edubeige-lab/images/gallery/homepage.svg",
+  "summary": "공지, 일정, 자료실을 한 화면에 엮은 학급 안내 페이지",
+  "detail": "카드형 구조와 CTA 중심 문구를 적용한 예시"
+}

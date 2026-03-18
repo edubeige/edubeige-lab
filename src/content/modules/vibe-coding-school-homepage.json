@@ -1,0 +1,49 @@
+{
+  "id": "module-3",
+  "slug": "vibe-coding-school-homepage",
+  "eventId": "event-2026-03-15",
+  "order": 3,
+  "title": "바이브 코딩으로 학급 안내 페이지 만들기",
+  "summary": "텍스트 프롬프트를 바탕으로 실습형 웹페이지 구성하기",
+  "learningGoals": [
+    "웹페이지 섹션 구조를 기획할 수 있다.",
+    "AI와 협업해 안내용 페이지 문구를 개선할 수 있다."
+  ],
+  "startTime": "11:10",
+  "endTime": "12:00",
+  "tags": [
+    "바이브 코딩",
+    "결과물 공유"
+  ],
+  "checklist": [
+    "공개 가능한 예시 자료만 사용하기",
+    "학급명과 개인정보 비식별 처리하기"
+  ],
+  "steps": [
+    {
+      "title": "페이지 구조 설계",
+      "body": "히어로, 일정, 자료실, FAQ 섹션을 먼저 정리한다."
+    },
+    {
+      "title": "카피 작성",
+      "body": "연수 소개 문구와 버튼 문구를 AI로 다듬는다."
+    },
+    {
+      "title": "결과 공유",
+      "body": "완성한 화면을 캡처해 사례 갤러리 후보로 남긴다."
+    }
+  ],
+  "promptIds": [
+    "prompt-vibe-coding-landing",
+    "prompt-lesson-starter"
+  ],
+  "resourceIds": [
+    "resource-vibe-kit"
+  ],
+  "shareLinks": [
+    {
+      "label": "결과물 제출 링크",
+      "url": "https://example.com/upload"
+    }
+  ]
+}

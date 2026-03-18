@@ -1,0 +1,25 @@
+{
+  "siteTitle": "edubeige-lab",
+  "siteSubtitle": "교원 연수 운영을 위한 실습형 콘텐츠 허브",
+  "siteBasePath": "/edubeige-lab/",
+  "featuredEventSlug": "2026-03-ai-teacher-workshop",
+  "contactEmail": "edubeige@example.kr",
+  "footerLinks": [
+    {
+      "label": "연수 일정",
+      "href": "/events"
+    },
+    {
+      "label": "프롬프트 허브",
+      "href": "/prompts"
+    },
+    {
+      "label": "자료실",
+      "href": "/resources"
+    }
+  ],
+  "theme": {
+    "accent": "blue",
+    "rounded": "xl"
+  }
+}

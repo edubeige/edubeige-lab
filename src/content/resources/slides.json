@@ -1,0 +1,10 @@
+{
+  "id": "resource-slides",
+  "title": "오늘의 강의 요약 카드",
+  "type": "link",
+  "scope": "event",
+  "eventId": "event-2026-03-15",
+  "description": "연수 중 핵심 안내를 다시 볼 수 있는 요약 자료",
+  "url": "/edubeige-lab/files/session-summary.txt",
+  "downloadLabel": "열기"
+}

@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../../components/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import ResourceCard from "../../components/ResourceCard.astro";
+import { getResources } from "../../lib/site";
+
+const resources = await getResources();
+const types = [...new Set(resources.map((resource) => resource.data.type))];
+---
+
+<BaseLayout title="자료실 | edubeige-lab" navLabel="Resources">
+  <PageIntro
+    eyebrow="Resources"
+    title="자료실"
+    description="회차 전용 자료와 상시 참고 자료를 한 번에 찾을 수 있는 다운로드 허브입니다."
+    accent="학교망 환경을 고려한 직접 링크 우선"
+  />
+
+  <section class="container section">
+    <div class="section-shell filters">
+      <div class="filter-row">
+        <input id="resource-search" type="search" placeholder="자료 제목 또는 설명 검색" />
+        <select id="resource-type">
+          <option value="">유형 전체</option>
+          {types.map((type) => <option value={type}>{type}</option>)}
+        </select>
+        <select id="resource-scope">
+          <option value="">범위 전체</option>
+          <option value="event">회차 자료</option>
+          <option value="evergreen">상시 자료</option>
+        </select>
+      </div>
+      <div class="card-grid" id="resource-grid">
+        {resources.map((resource) => <ResourceCard resource={resource} />)}
+      </div>
+      <div id="resource-empty" class="empty-state hidden">조건에 맞는 자료가 없습니다.</div>
+    </div>
+  </section>
+
+  <script>
+    const cards = Array.from(document.querySelectorAll("[data-resource-card]"));
+    const searchInput = document.querySelector("#resource-search");
+    const typeSelect = document.querySelector("#resource-type");
+    const scopeSelect = document.querySelector("#resource-scope");
+    const emptyState = document.querySelector("#resource-empty");
+
+    if (
+      searchInput instanceof HTMLInputElement &&
+      typeSelect instanceof HTMLSelectElement &&
+      scopeSelect instanceof HTMLSelectElement
+    ) {
+      const dataset = cards.map((card) => {
+        const payload = JSON.parse(card.getAttribute("data-searchable") ?? "{}");
+        return { element: card, ...payload };
+      });
+
+      const render = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        dataset.forEach((item) => {
+          const haystack = `${item.title} ${item.description}`.toLowerCase();
+          const matchesQuery = !query || haystack.includes(query);
+          const matchesType = !typeSelect.value || item.type === typeSelect.value;
+          const matchesScope = !scopeSelect.value || item.scope === scopeSelect.value;
+          const visible = matchesQuery && matchesType && matchesScope;
+          item.element.classList.toggle("hidden", !visible);
+          if (visible) visibleCount += 1;
+        });
+
+        if (emptyState instanceof HTMLElement) {
+          emptyState.classList.toggle("hidden", visibleCount !== 0);
+        }
+      };
+
+      [searchInput, typeSelect, scopeSelect].forEach((control) => control.addEventListener("input", render));
+      render();
+    }
+  </script>
+</BaseLayout>

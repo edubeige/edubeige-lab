@@ -1,0 +1,49 @@
+{
+  "id": "module-2",
+  "slug": "chatgpt-feedback-rubric",
+  "eventId": "event-2026-03-15",
+  "order": 2,
+  "title": "ChatGPT로 피드백 문장과 루브릭 만들기",
+  "summary": "학생 결과물 피드백과 평가 문항을 빠르게 설계하기",
+  "learningGoals": [
+    "교과별 피드백 문장을 자동화하는 흐름을 익힌다.",
+    "루브릭 초안을 수업 맥락에 맞게 수정할 수 있다."
+  ],
+  "startTime": "10:05",
+  "endTime": "10:55",
+  "tags": [
+    "프롬프트 실습",
+    "수업 적용"
+  ],
+  "checklist": [
+    "학생 개인정보는 입력하지 않기",
+    "기존 평가 기준표 준비"
+  ],
+  "steps": [
+    {
+      "title": "평가 기준 정리",
+      "body": "기존 평가 요소를 3개 수준으로 나눈다."
+    },
+    {
+      "title": "피드백 문장 생성",
+      "body": "학생 수준별 피드백 문장을 요청한다."
+    },
+    {
+      "title": "교실 언어로 다듬기",
+      "body": "교실에서 실제로 쓸 말투로 수정한다."
+    }
+  ],
+  "promptIds": [
+    "prompt-feedback-science",
+    "prompt-rubric-builder"
+  ],
+  "resourceIds": [
+    "resource-checklist"
+  ],
+  "shareLinks": [
+    {
+      "label": "모둠별 공유 문서",
+      "url": "https://example.com/share"
+    }
+  ]
+}

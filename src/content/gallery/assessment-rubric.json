@@ -1,0 +1,14 @@
+{
+  "id": "gallery-assessment-rubric",
+  "title": "AI 기반 수행평가 루브릭",
+  "tool": "ChatGPT",
+  "subjects": [
+    "공통"
+  ],
+  "purposes": [
+    "평가 설계"
+  ],
+  "thumbnail": "/edubeige-lab/images/gallery/rubric.svg",
+  "summary": "평가 기준을 시각적으로 정리한 카드형 예시",
+  "detail": "수준별 피드백 문장을 함께 제공하는 루브릭 사례"
+}
